@@ -140,36 +140,14 @@ declare module 'astro:content' {
 	>;
 
 	type ContentEntryMap = {
-		"blog": {
-"ansible-complete-guide.md": {
-	id: "ansible-complete-guide.md";
-  slug: "ansible-complete-guide";
+		"blog": Record<string, {
+  id: string;
+  slug: string;
   body: string;
   collection: "blog";
-  data: InferEntrySchema<"blog">
-} & { render(): Render[".md"] };
-"astro-blog-setup.md": {
-	id: "astro-blog-setup.md";
-  slug: "astro-blog-setup";
-  body: string;
-  collection: "blog";
-  data: InferEntrySchema<"blog">
-} & { render(): Render[".md"] };
-"k8s-cluster-setup-arm64.md": {
-	id: "k8s-cluster-setup-arm64.md";
-  slug: "k8s-cluster-setup-arm64";
-  body: string;
-  collection: "blog";
-  data: InferEntrySchema<"blog">
-} & { render(): Render[".md"] };
-"langchain-langgraph-tutorial.md": {
-	id: "langchain-langgraph-tutorial.md";
-  slug: "langchain-langgraph-tutorial";
-  body: string;
-  collection: "blog";
-  data: InferEntrySchema<"blog">
-} & { render(): Render[".md"] };
-};
+  data: InferEntrySchema<"blog">;
+  render(): Render[".md"];
+}>;
 
 	};
 

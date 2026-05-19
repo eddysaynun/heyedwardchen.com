@@ -2,7 +2,7 @@
 title: 从零搭建 Astro 个人博客
 description: 使用 Astro + TailwindCSS 构建现代化静态博客，实现内容集合、置顶排序、时间线导航等最佳实践。
 pubDate: 2026-05-10
-updatedDate: 2026-05-14
+updatedDate: 2026-05-18
 tags:
   - Astro
   - TailwindCSS
@@ -736,16 +736,52 @@ const yearMonths = Object.keys(groupedPosts).sort((a, b) => {
 
 ## 七、后续扩展
 
+### 已实现功能
 - [x] 评论系统（Giscus）
-- [x] 全文搜索（Pagefind）
-- [ ] 网站统计（Umami）
+- [x] 全文搜索（FlexSearch）
 - [x] RSS 订阅
 - [x] Tag 云图
 - [x] 相关文章推荐
-- [x] 多语言支持（i18n）
+- [x] 时间线导航
+- [x] 暗黑模式（浅色/深色/跟随系统）
+- [x] 标签筛选
+- [x] 置顶文章
+- [x] 自定义面板（主题/字体/密度）
+
+### 待实现功能
+
+#### 用户体验
+- [ ] **键盘导航** - `j/k` 切换文章，`/` 聚焦搜索，`Esc` 关闭弹窗
+- [ ] **图片懒加载 + 缩略图** - `loading="lazy"` + 响应式 `srcset`
+- [ ] **代码块复制按钮** - 一键复制代码，带 Toast 反馈
+- [ ] **阅读进度条** - 页面顶部显示阅读进度
+- [ ] **目录导航（TOC）** - 右侧章节目录，滚动高亮
+- [ ] **阅读时长估算** - 根据字数估算阅读时间
+- [ ] **回到顶部按钮** - 滚动 300px 后显示
+- [ ] **分享功能** - 微信/微博/Twitter/复制链接/二维码
+
+#### 性能优化
+- [ ] **性能优化** - Lighthouse 评分目标（性能 95+，SEO 100）
+  - 图片优化：使用 `astro/assets`，WebP 转换，响应式图片
+  - 预加载关键资源：`<link rel="preconnect">` + `<link rel="preload">`
+  - 减少重排：使用 `transform` 而非 `top/left`
+- [ ] **字体优化** - `font-display: swap` 防止 FOIT，子集化，本地托管
+- [ ] **缓存策略** - Service Worker + HTTP 缓存头优化
+
+#### SEO 与可访问性
+- [ ] **SEO 优化** - 结构化数据（JSON-LD），Open Graph 元标签
+  - BlogPosting 结构化数据
+  - Twitter Cards
+  - 站点地图（sitemap.xml）
+- [ ] **无障碍增强** - `skip to main` 链接，焦点可见性，ARIA 标签
+
+#### 高级功能
+- [ ] **PWA 支持** - 离线访问，添加到主屏幕
+- [ ] **多语言切换** - 中英文切换（i18n）
+- [ ] **网站统计** - Umami / Plausible（隐私友好）
+- [ ] **邮件订阅** - Newsletter 新文章推送
 
 ---
 
 **更新时间**: 2026-05-14  
 **阅读时间**: 12 分钟  
-**Git Commit**: `a5702c5` - 添加时间线组件并抽象排序逻辑
