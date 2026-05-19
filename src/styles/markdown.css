@@ -141,6 +141,17 @@
   line-height: 1.6;
 }
 
+/* Shiki dual-theme: keep page-style background (var(--panel) from .pre rule), swap token colors */
+.markdown-body .astro-code,
+.markdown-body .astro-code span {
+  color: var(--shiki-light);
+}
+
+[data-theme='dark'] .markdown-body .astro-code,
+[data-theme='dark'] .markdown-body .astro-code span {
+  color: var(--shiki-dark);
+}
+
 /* 复制按钮 */
 .markdown-body pre .copy-code-btn {
   position: absolute;
@@ -299,12 +310,6 @@
 
 .markdown-body tr:hover {
   background: var(--panel);
-}
-
-/* Syntax highlighting */
-.markdown-body .hljs {
-  background: transparent !important;
-  padding: 0 !important;
 }
 
 /* Mobile responsive */

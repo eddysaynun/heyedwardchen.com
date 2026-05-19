@@ -3,15 +3,14 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "npx astro dev",
-    "start": "npx astro dev",
-    "build": "npx astro build",
+    "dev": "npm run sync-blog && npx astro dev",
+    "start": "npm run dev",
+    "build": "npm run sync-blog && npx astro build",
     "preview": "npm run build && wrangler dev",
     "astro": "npx astro",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "sync-blog": "./scripts/sync-obsidian-blog.sh",
-    "sync-and-commit": "./scripts/sync-obsidian-blog.sh && git add src/content/blog && git commit -m \"同步博客文章\" && git push"
+    "sync-blog": "./scripts/sync-obsidian-blog.sh"
   },
   "dependencies": {
     "@astrojs/cloudflare": "11",

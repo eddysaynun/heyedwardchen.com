@@ -57,30 +57,27 @@ personal-blog/
 - **SEO 友好**: 语义化 HTML，结构化数据
 - **类型安全**: TypeScript 支持
 
-## 📝 添加新文章
+## 📝 博客文章同步
 
-1. 在 `src/pages/blog/` 目录下创建新的 `.astro` 文件
-2. 使用 `Layout` 组件包裹内容
-3. 在 `blog.astro` 中添加文章元数据
+博客文章源统一维护在 Obsidian 05-Blog 对应的仓库：
 
-示例:
+```bash
+git@github.com:eddysaynun/edward-obsidian-blog.git
+```
 
-```astro
----
-import Layout from '../layouts/Layout.astro';
+本项目的 `src/content/blog/` 是本地同步目标目录，不作为文章源直接维护，也不提交到 `git@github.com:eddysaynun/edwardchen.com.git`。
 
-const post = {
-  title: '文章标题',
-  date: '2025-05-13',
-  tags: ['标签 1', '标签 2']
-};
----
+本地调试和构建会自动先同步文章：
 
-<Layout title={post.title}>
-  <article>
-    <!-- 文章内容 -->
-  </article>
-</Layout>
+```bash
+npm run dev
+npm run build
+```
+
+也可以单独同步文章：
+
+```bash
+npm run sync-blog
 ```
 
 ## 🌐 部署到 Cloudflare Pages

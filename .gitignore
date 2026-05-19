@@ -1,8 +1,13 @@
 node_modules
 .DS_Store
 dist
+.astro
 *.log
 .env
+
+# Blog posts are pulled from the Obsidian blog repository for local dev/build.
+# Do not commit them to this site repository.
+src/content/blog/
 
 # wrangler files
 .wrangler
