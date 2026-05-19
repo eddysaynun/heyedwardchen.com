@@ -1,8 +1,10 @@
 ---
 title: "Obsidian 完全指南：从入门到精通"
 description: "深入探索 Obsidian 笔记应用，掌握高级用法、高效插件和工作流，打造你的第二大脑"
-date: 2025-05-18
+pubDate: 2026-05-18
+updatedDate: 2026-05-18
 tags: [obsidian]
+pinned: false
 ---
 
 # Obsidian 完全指南：从入门到精通
