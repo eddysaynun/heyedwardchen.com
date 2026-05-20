@@ -286,22 +286,47 @@
   border-collapse: collapse;
   margin: 1.25rem 0;
   font-size: 14px;
+  table-layout: auto;
+  min-width: 100%;
 }
 
 .markdown-body th {
   background: var(--panel);
   font-weight: 600;
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   border: 1px solid var(--line);
   color: var(--ink);
   font-family: var(--mono);
   font-size: 12px;
+  white-space: normal;
 }
 
 .markdown-body td {
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   border: 1px solid var(--line);
+  line-height: 1.6;
+}
+
+.markdown-body th,
+.markdown-body td {
+  min-width: 0;
+  max-width: 16rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+/* 宽表格以正文中心线为基准轻微外扩，文字换行后不再接近整屏铺开。 */
+.markdown-body > table {
+  width: max-content;
+  max-width: min(calc(100% + 8rem), calc(100vw - 2rem));
+  text-align: left;
+  margin: 1.25rem 0;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: visible;
 }
 
 .markdown-body tr:nth-child(even) {
@@ -330,8 +355,15 @@
     font-size: 17px;
   }
 
-  .markdown-body table {
-    display: block;
-    overflow-x: auto;
+  .markdown-body > table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  .markdown-body th,
+  .markdown-body td {
+    max-width: none;
+    padding: 0.625rem 0.5rem;
   }
 }
