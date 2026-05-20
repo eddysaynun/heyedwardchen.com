@@ -1,0 +1,22 @@
+name: Scheduled Cloudflare Pages Build
+
+on:
+  schedule:
+    # 03:15 Asia/Shanghai every day. GitHub Actions cron uses UTC.
+    - cron: "15 19 * * *"
+  workflow_dispatch:
+
+jobs:
+  trigger-cloudflare-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages deploy hook
+        env:
+          CLOUDFLARE_DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$CLOUDFLARE_DEPLOY_HOOK_URL" ]; then
+            echo "::error::Missing GitHub Actions secret: CLOUDFLARE_DEPLOY_HOOK_URL"
+            exit 1
+          fi
+
+          curl -fsS -X POST "$CLOUDFLARE_DEPLOY_HOOK_URL"
