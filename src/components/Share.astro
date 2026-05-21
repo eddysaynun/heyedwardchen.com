@@ -179,7 +179,7 @@ const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=1
 
   .qr-popover {
     position: absolute;
-    right: 0;
+    left: 50%;
     top: calc(100% + 8px);
     z-index: 20;
     width: 184px;
@@ -189,6 +189,7 @@ const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=1
     background: #fff;
     padding: 11px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+    transform: translateX(-50%);
   }
 
   .qr-popover img {
