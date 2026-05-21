@@ -99,6 +99,18 @@ export const translations: Translations = {
   'settings.language.en': { 'zh-CN': 'English', en: 'English' },
   'settings.customize': { 'zh-CN': '自定义设置', en: 'Customize settings' },
 
+  // 分享
+  'share.title': { 'zh-CN': '分享', en: 'Share' },
+  'share.aria': { 'zh-CN': '分享文章', en: 'Share article' },
+  'share.twitter': { 'zh-CN': '分享到 Twitter', en: 'Share to Twitter' },
+  'share.weibo': { 'zh-CN': '分享到微博', en: 'Share to Weibo' },
+  'share.weiboLabel': { 'zh-CN': '微博', en: 'Weibo' },
+  'share.copy': { 'zh-CN': '复制文章链接', en: 'Copy article link' },
+  'share.copyLabel': { 'zh-CN': '复制链接', en: 'Copy link' },
+  'share.qr': { 'zh-CN': '显示二维码', en: 'Show QR code' },
+  'share.qrLabel': { 'zh-CN': '二维码', en: 'QR code' },
+  'share.qrAlt': { 'zh-CN': '二维码：{title}', en: 'QR code: {title}' },
+
   // 搜索
   'search.clear': { 'zh-CN': '清除', en: 'Clear' },
   'search.resultsCount': { 'zh-CN': '找到 {count} 篇文章', en: '{count} posts found' },

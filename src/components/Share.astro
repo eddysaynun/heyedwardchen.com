@@ -1,62 +1,95 @@
 ---
+import { t, DEFAULT_LANG } from '../utils/i18n';
+
 interface Props {
   title: string;
   description?: string;
   url: string;
 }
 
+const lang = DEFAULT_LANG;
 const { title, description = '', url } = Astro.props;
 const encodedUrl = encodeURIComponent(url);
-const encodedTitle = encodeURIComponent(title);
-const encodedDescription = encodeURIComponent(description);
-const twitterUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
-const weiboUrl = `https://service.weibo.com/share/share.php?url=${encodedUrl}&title=${encodedTitle}`;
+const twitterUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}`;
+const weiboUrl = `https://service.weibo.com/share/share.php?url=${encodedUrl}`;
 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=10&data=${encodedUrl}`;
 ---
 
-<section class="share-box" aria-label="分享文章">
+<section class="share-box" aria-label={t('share.aria', lang)} data-i18n-aria-label="share.aria">
   <div class="share-head">
-    <h2>分享</h2>
-    <span>share</span>
+    <h2 data-i18n="share.title">{t('share.title', lang)}</h2>
   </div>
 
   <div class="share-actions">
-    <a href={twitterUrl} target="_blank" rel="noopener" aria-label="分享到 Twitter">
+    <a href={twitterUrl} class="share-twitter" target="_blank" rel="noopener" aria-label={t('share.twitter', lang)} data-i18n-aria-label="share.twitter">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
       </svg>
       <span>Twitter</span>
     </a>
-    <a href={weiboUrl} target="_blank" rel="noopener" aria-label="分享到微博">
-      <span aria-hidden="true">微博</span>
+    <a href={weiboUrl} class="share-weibo" target="_blank" rel="noopener" aria-label={t('share.weibo', lang)} data-i18n-aria-label="share.weibo">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8.5 17.5c-2.9 0-5.25-1.54-5.25-3.44 0-1.6 1.66-2.95 3.92-3.33.77-2.6 3.08-4.48 5.8-4.48 3.35 0 6.06 2.85 6.06 6.36 0 2.7-1.6 4.89-3.87 5.82" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M8.75 13.05c1.86-.56 3.73.02 4.17 1.29.44 1.27-.71 2.76-2.57 3.32-1.86.56-3.73-.02-4.17-1.29-.44-1.27.71-2.76 2.57-3.32Z" stroke="currentColor" stroke-width="1.8"></path>
+        <path d="M17.2 3.8c1.6.22 2.86 1.48 3.08 3.08M17.75 1.5c2.56.35 4.58 2.37 4.93 4.93" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+      </svg>
+      <span data-i18n="share.weiboLabel">{t('share.weiboLabel', lang)}</span>
     </a>
-    <button type="button" class="copy-share" data-share-url={url} data-share-title={title} data-share-description={description} aria-label="复制文章链接">
+    <button type="button" class="copy-share" data-share-url={url} aria-label={t('share.copy', lang)} data-i18n-aria-label="share.copy">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10.9 5.03M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07l1.22-1.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
       </svg>
-      <span>复制链接</span>
+      <span data-i18n="share.copyLabel">{t('share.copyLabel', lang)}</span>
     </button>
     <details class="qr-share">
-      <summary aria-label="显示二维码">二维码</summary>
-      <img src={qrUrl} alt={`二维码：${title}`} width="160" height="160" loading="lazy" decoding="async" />
+      <summary aria-label={t('share.qr', lang)} data-i18n-aria-label="share.qr">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h2v2h-2v-2Zm4 0h2v2h-2v-2Zm-4 4h2v2h-2v-2Zm4 0h2v2h-2v-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+        </svg>
+        <span data-i18n="share.qrLabel">{t('share.qrLabel', lang)}</span>
+      </summary>
+      <div class="qr-popover">
+        <img class="share-qr-image" src={qrUrl} alt={t('share.qrAlt', lang, { title })} width="160" height="160" loading="lazy" decoding="async" />
+      </div>
     </details>
   </div>
 </section>
 
 <script>
+  const currentUrl = window.location.href;
+  const currentEncodedUrl = encodeURIComponent(currentUrl);
+  const twitterLink = document.querySelector<HTMLAnchorElement>('.share-twitter');
+  const weiboLink = document.querySelector<HTMLAnchorElement>('.share-weibo');
+  const qrImage = document.querySelector<HTMLImageElement>('.share-qr-image');
+
+  if (twitterLink) {
+    twitterLink.href = `https://twitter.com/intent/tweet?url=${currentEncodedUrl}`;
+  }
+
+  if (weiboLink) {
+    weiboLink.href = `https://service.weibo.com/share/share.php?url=${currentEncodedUrl}`;
+  }
+
+  if (qrImage) {
+    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=10&data=${currentEncodedUrl}`;
+  }
+
+  const qrShare = document.querySelector<HTMLDetailsElement>('.qr-share');
+  document.addEventListener('click', (event) => {
+    if (!qrShare?.open) return;
+    if (event.target instanceof Node && qrShare.contains(event.target)) return;
+    qrShare.open = false;
+  });
+
   document.querySelectorAll<HTMLButtonElement>('.copy-share').forEach((button) => {
+    button.dataset.shareUrl = currentUrl;
+
     button.addEventListener('click', async () => {
       const url = button.dataset.shareUrl;
-      const title = button.dataset.shareTitle;
-      const description = button.dataset.shareDescription;
       if (!url) return;
 
       try {
-        if (navigator.share && title) {
-          await navigator.share({ title, text: description, url });
-        } else {
-          await navigator.clipboard.writeText(url);
-        }
+        await navigator.clipboard.writeText(url);
         button.classList.add('copied');
         window.setTimeout(() => button.classList.remove('copied'), 1600);
       } catch {
@@ -73,10 +106,6 @@ const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=1
   }
 
   .share-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
     margin-bottom: 12px;
     font-family: var(--mono);
   }
@@ -92,11 +121,6 @@ const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=1
   .share-head h2::before {
     content: '// ';
     color: var(--muted-2);
-  }
-
-  .share-head span {
-    color: var(--muted-2);
-    font-size: 11px;
   }
 
   .share-actions {
@@ -153,17 +177,23 @@ const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=1
     display: none;
   }
 
-  .qr-share img {
+  .qr-popover {
     position: absolute;
     right: 0;
     top: calc(100% + 8px);
     z-index: 20;
-    width: 160px;
-    height: 160px;
+    width: 184px;
+    min-height: 184px;
     border: 1px solid var(--line-strong);
     border-radius: var(--radius);
     background: #fff;
-    padding: 8px;
+    padding: 11px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  }
+
+  .qr-popover img {
+    display: block;
+    width: 160px;
+    height: 160px;
   }
 </style>

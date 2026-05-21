@@ -24,10 +24,10 @@
   .back-to-top {
     position: fixed;
     right: 24px;
-    bottom: 88px;
+    bottom: 84px;
     z-index: 999;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border: 1px solid var(--line-strong);
     border-radius: 50%;
     color: var(--ink);
@@ -39,7 +39,7 @@
     place-items: center;
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+    transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   }
 
   .back-to-top[hidden] {
@@ -51,10 +51,13 @@
 
   .back-to-top:hover {
     border-color: var(--ink-2);
+    background: color-mix(in oklch, var(--bg) 92%, transparent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
   }
 
   .back-to-top svg {
-    width: 17px;
-    height: 17px;
+    width: 18px;
+    height: 18px;
   }
 </style>
