@@ -36,8 +36,9 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
 </div>
 
 <script>
-  import { Document } from 'flexsearch';
   import { t, type Language } from '../utils/i18n';
+
+  type SearchDocument = import('flexsearch').Document<SearchPost>;
 
   interface SearchPost {
     id: number;
@@ -49,7 +50,8 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
     content: string;
   }
 
-  let index: Document<SearchPost> | null = null;
+  let index: SearchDocument | null = null;
+  let indexPromise: Promise<void> | null = null;
   let data: SearchPost[] = [];
   let latestResults: number[] = [];
   let latestQuery = '';
@@ -65,39 +67,56 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
   
   async function loadIndex() {
     if (index) return;
-    
-    try {
-      const response = await fetch('/search-index.json');
+    if (indexPromise) return indexPromise;
+
+    indexPromise = (async () => {
+      const [{ Document }, response] = await Promise.all([
+        import('flexsearch'),
+        fetch('/search-index.json'),
+      ]);
+
       if (!response.ok) throw new Error('Search index not found');
       data = await response.json() as SearchPost[];
-      
-      // Initialize FlexSearch
+
       index = new Document<SearchPost>({
         document: {
           id: 'id',
           index: ['title', 'description', 'content'],
-          tag: 'tags'
+          tag: 'tags',
         },
         tokenize: 'forward',
         context: {
           resolution: 9,
           depth: 2,
-          separation: false
-        }
+          separation: false,
+        },
       });
-      
-      // Add documents to index
+
       data.forEach(doc => index?.add(doc));
-    } catch (error) {
+    })().catch((error) => {
+      indexPromise = null;
       console.error('Failed to load search index:', error);
-    }
+    });
+
+    return indexPromise;
   }
-  
+
+  function escapeHtml(text: string) {
+    return text.replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    }[char]!));
+  }
+
   function highlightText(text: string, query: string) {
-    if (!query) return text;
+    const escapedText = escapeHtml(text);
+    if (!query) return escapedText;
     const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedQuery})`, 'gi');
-    return text.replace(regex, '<mark>$1</mark>');
+    return escapedText.replace(regex, '<mark>$1</mark>');
   }
   
   function renderResults(results: number[], query: string) {
@@ -120,14 +139,18 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
       const post = data[id];
       if (!post) return '';
       const date = new Date(post.published).toLocaleDateString(getLang(), { month: '2-digit', day: '2-digit' });
+      const tagMarkup = post.tags
+        .slice(0, 3)
+        .map(tag => `<span>#${escapeHtml(tag)}</span>`)
+        .join('');
       return `
         <li class="result-item">
-          <a href="${post.slug}" class="result-link">
-            <time class="result-date" datetime="${post.published}">${date}</time>
+          <a href="${escapeHtml(post.slug)}" class="result-link">
+            <time class="result-date" datetime="${escapeHtml(post.published)}">${date}</time>
             <div class="result-body">
               <h3 class="result-title">${highlightText(post.title, query)}</h3>
               <p class="result-description">${highlightText(post.description || translate('search.noDescription'), query)}</p>
-              ${post.tags.length > 0 ? `<div class="result-tags">${post.tags.slice(0, 3).map(tag => `<span>#${tag}</span>`).join('')}</div>` : ''}
+              ${tagMarkup ? `<div class="result-tags">${tagMarkup}</div>` : ''}
             </div>
             <span class="result-arrow">→</span>
           </a>
@@ -205,9 +228,6 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
       if (results) results.hidden = true;
     }
   });
-  
-  // Load index on mount
-  loadIndex();
 </script>
 
 <style>

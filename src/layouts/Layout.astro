@@ -1,16 +1,54 @@
 ---
 import '../styles/global.css';
 import '../styles/markdown.css';
-import CopyCode from '../components/CopyCode.astro';
+import BackToTop from '../components/BackToTop.astro';
+import KeyboardNav from '../components/KeyboardNav.astro';
 import Tweaks from '../components/Tweaks.astro';
 import T from '../components/T.astro';
 
 interface Props {
   title: string;
   description?: string;
+  canonical?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description = "Edward Chen - 构建事物的笔记" } = Astro.props;
+const {
+  title,
+  description = "Edward Chen - 构建事物的笔记",
+  canonical,
+  image = '/favicon.svg',
+  type = 'website',
+  structuredData,
+} = Astro.props;
+
+const site = Astro.site ?? new URL(Astro.url.origin);
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, site).toString();
+const imageUrl = new URL(image, site).toString();
+const baseStructuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Edward Chen',
+    url: new URL('/', site).toString(),
+    description: 'Edward Chen - 构建事物的笔记',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Edward Chen',
+    url: new URL('/', site).toString(),
+    sameAs: [
+      'https://github.com/eddysaynun',
+      'https://x.com/eddysaynun',
+    ],
+  },
+];
+const jsonLd = structuredData
+  ? [...baseStructuredData, ...(Array.isArray(structuredData) ? structuredData : [structuredData])]
+  : baseStructuredData;
 ---
 
 <!doctype html>
@@ -19,10 +57,23 @@ const { title, description = "Edward Chen - 构建事物的笔记" } = Astro.pro
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/rss.xml" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <meta property="og:site_name" content="Edward Chen" />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <!-- 在首次 paint 前同步主题 + 语言，避免闪烁 -->
     <script is:inline>
@@ -50,9 +101,13 @@ const { title, description = "Edward Chen - 构建事物的笔记" } = Astro.pro
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+    </noscript>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
     <div class="wrap">
       <!-- Header -->
       <header class="site">
@@ -74,7 +129,7 @@ const { title, description = "Edward Chen - 构建事物的笔记" } = Astro.pro
       </header>
 
       <!-- Main Content -->
-      <main>
+      <main id="main-content" tabindex="-1">
         <slot />
       </main>
 
@@ -110,6 +165,7 @@ const { title, description = "Edward Chen - 构建事物的笔记" } = Astro.pro
     </div>
 
     <Tweaks />
-    <CopyCode />
+    <BackToTop />
+    <KeyboardNav />
   </body>
 </html>

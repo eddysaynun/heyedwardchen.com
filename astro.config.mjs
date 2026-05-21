@@ -4,6 +4,28 @@ import tailwind from '@astrojs/tailwind';
 
 import cloudflare from "@astrojs/cloudflare";
 
+function addImageAttributes() {
+  return (tree) => {
+    const visit = (node) => {
+      if (!node || typeof node !== 'object') return;
+
+      if (node.type === 'element' && node.tagName === 'img') {
+        node.properties = {
+          loading: 'lazy',
+          decoding: 'async',
+          ...node.properties,
+        };
+      }
+
+      if (Array.isArray(node.children)) {
+        node.children.forEach(visit);
+      }
+    };
+
+    visit(tree);
+  };
+}
+
 export default defineConfig({
   site: 'https://edwardchen.com',
 
@@ -12,6 +34,7 @@ export default defineConfig({
   ],
 
   markdown: {
+    rehypePlugins: [addImageAttributes],
     shikiConfig: {
       themes: {
         light: 'github-light',

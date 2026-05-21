@@ -3,7 +3,10 @@ import Layout from '../../layouts/Layout.astro';
 import T from '../../components/T.astro';
 import { getCollection } from 'astro:content';
 import Giscus from '../../components/Giscus.astro';
+import CopyCode from '../../components/CopyCode.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
 import RelatedPosts from '../../components/RelatedPosts.astro';
+import Share from '../../components/Share.astro';
 import { t, DEFAULT_LANG } from '../../utils/i18n';
 
 const lang = DEFAULT_LANG;
@@ -40,9 +43,39 @@ const sortedPosts = [...allPostsData].sort((a, b) => b.published.getTime() - a.p
 const postIndex = sortedPosts.findIndex(p => p.id === post.id);
 const prevPost = sortedPosts[postIndex + 1];
 const nextPost = sortedPosts[postIndex - 1];
+const canonicalUrl = new URL(`/blog/${post.slug}/`, Astro.site).toString();
+const readMinutes = Math.max(1, Math.ceil(post.body.length / 500));
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate?.toISOString(),
+  dateModified: (post.data.updatedDate ?? post.data.pubDate)?.toISOString(),
+  url: canonicalUrl,
+  mainEntityOfPage: canonicalUrl,
+  author: {
+    '@type': 'Person',
+    name: 'Edward Chen',
+    url: new URL('/', Astro.site).toString(),
+  },
+  publisher: {
+    '@type': 'Person',
+    name: 'Edward Chen',
+  },
+  keywords: post.data.tags.join(', '),
+};
 ---
 
-<Layout title={`${post.data.title} - Edward Chen`}>
+<Layout
+  title={`${post.data.title} - Edward Chen`}
+  description={post.data.description}
+  canonical={canonicalUrl}
+  type="article"
+  structuredData={structuredData}
+>
+  <ReadingProgress />
+
   <!-- Left TOC -->
   {tocHeadings.length > 0 && (
     <aside class="article-toc">
@@ -72,7 +105,7 @@ const nextPost = sortedPosts[postIndex - 1];
           {post.data.pubDate?.toLocaleDateString(lang, { year: 'numeric', month: '2-digit', day: '2-digit' }) || t('common.unpublished', lang)}
         </time>
         <span>•</span>
-        <T tkey="post.readTime" params={{ minutes: Math.max(1, Math.ceil(post.body.length / 500)) }} />
+        <T tkey="post.readTime" params={{ minutes: readMinutes }} />
         {post.data.pinned && (
           <>
             <span>•</span>
@@ -113,6 +146,8 @@ const nextPost = sortedPosts[postIndex - 1];
       <RelatedPosts posts={relatedPosts} />
     )}
 
+    <Share title={post.data.title} description={post.data.description} url={canonicalUrl} />
+
     <nav class="sec flex justify-between items-center flex-wrap gap-4">
       {prevPost ? (
         <a href={`/blog/${prevPost.slug}`} class="font-mono text-xs text-muted hover:text-ink transition-colors inline-flex items-center gap-2">
@@ -143,6 +178,8 @@ const nextPost = sortedPosts[postIndex - 1];
       loading="lazy"
     />
   </article>
+
+  <CopyCode />
 
   <style>
     /* Left TOC - Timeline Style */

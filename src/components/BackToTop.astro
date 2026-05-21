@@ -1,0 +1,60 @@
+<button id="back-to-top" class="back-to-top" type="button" aria-label="回到顶部" hidden>
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </svg>
+</button>
+
+<script>
+  const backToTop = document.getElementById('back-to-top');
+
+  function updateBackToTop() {
+    if (!backToTop) return;
+    backToTop.hidden = window.scrollY < 300;
+  }
+
+  backToTop?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  updateBackToTop();
+  document.addEventListener('scroll', updateBackToTop, { passive: true });
+</script>
+
+<style>
+  .back-to-top {
+    position: fixed;
+    right: 24px;
+    bottom: 88px;
+    z-index: 999;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--ink);
+    background: color-mix(in oklch, var(--bg) 84%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .back-to-top[hidden] {
+    display: grid;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+  }
+
+  .back-to-top:hover {
+    border-color: var(--ink-2);
+  }
+
+  .back-to-top svg {
+    width: 17px;
+    height: 17px;
+  }
+</style>
