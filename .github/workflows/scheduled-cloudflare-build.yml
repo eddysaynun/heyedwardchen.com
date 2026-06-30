@@ -15,8 +15,8 @@ jobs:
           CLOUDFLARE_DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}
         run: |
           if [ -z "$CLOUDFLARE_DEPLOY_HOOK_URL" ]; then
-            echo "::error::Missing GitHub Actions secret: CLOUDFLARE_DEPLOY_HOOK_URL"
-            exit 1
+            echo "::warning::Missing GitHub Actions secret: CLOUDFLARE_DEPLOY_HOOK_URL; skipping Cloudflare Pages build trigger."
+            exit 0
           fi
 
           curl -fsS -X POST "$CLOUDFLARE_DEPLOY_HOOK_URL"
