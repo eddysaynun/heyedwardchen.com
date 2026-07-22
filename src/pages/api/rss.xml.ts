@@ -72,7 +72,7 @@ export async function GET() {
 </image>
 <atom:link href="https://heyedwardchen.com/api/rss.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom"/>
 <follow_challenge>
-  <feedId>1118027493089869824</feedId>
+  <feedId>1210651946751229952</feedId>
   <userId>67422381549442048</userId>
 </follow_challenge>`,
   });
