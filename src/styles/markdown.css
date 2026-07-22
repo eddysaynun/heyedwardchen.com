@@ -131,6 +131,13 @@
   margin: 1.25rem 0;
   border: 1px solid var(--line);
   position: relative;
+  
+  /* 网格背景 */
+  background-image: 
+    linear-gradient(rgba(28, 26, 23, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 26, 23, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
 }
 
 .markdown-body pre code {
@@ -139,6 +146,14 @@
   color: var(--ink);
   font-size: 14px;
   line-height: 1.6;
+}
+
+[data-theme='dark'] .markdown-body pre {
+  background-image: 
+    linear-gradient(rgba(236, 235, 230, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236, 235, 230, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
 }
 
 /* Shiki dual-theme: keep page-style background (var(--panel) from .pre rule), swap token colors */

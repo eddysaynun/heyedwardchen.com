@@ -14,7 +14,8 @@
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --serif: 'Newsreader', ui-serif, Georgia, serif;
-  --col: 720px;
+  --col: 800px;
+  --col-wide: 900px;
   --row-pad: 18px;
   --radius: 6px;
 }

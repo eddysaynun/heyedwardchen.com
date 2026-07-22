@@ -168,7 +168,7 @@ const structuredData = {
 
     <!-- Giscus Comments -->
     <Giscus 
-      repo="eddysaynun/edwardchen.com"
+      repo="eddysaynun/heyedwardchen.com"
       repoId="R_kgDOScJuxg"
       category="Announcements"
       categoryId="DIC_kwDOScJuxs4C9Ddh"
@@ -182,6 +182,22 @@ const structuredData = {
   <CopyCode />
 
   <style>
+    /* PC 端更宽的内容区域 */
+    @media (min-width: 1024px) {
+      .wrap {
+        max-width: var(--col-wide);
+      }
+      
+      .site-inner {
+        max-width: var(--col-wide);
+      }
+      
+      /* 文章详情页 PC 端更宽 */
+      .article-content {
+        max-width: 780px;
+      }
+    }
+    
     /* Left TOC - Timeline Style */
     .article-toc {
       position: fixed;

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://edwardchen.com/sitemap.xml
+Sitemap: https://heyedwardchen.com/sitemap.xml

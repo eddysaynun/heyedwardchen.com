@@ -167,6 +167,17 @@ const allTags = Object.entries(tagCounts)
   </script>
 
   <style>
+    /* PC 端更宽的内容区域 */
+    @media (min-width: 1024px) {
+      .wrap {
+        max-width: var(--col-wide);
+      }
+      
+      .site-inner {
+        max-width: var(--col-wide);
+      }
+    }
+    
     /* Controls row */
     .controls {
       display: flex;

@@ -27,7 +27,7 @@ function addImageAttributes() {
 }
 
 export default defineConfig({
-  site: 'https://edwardchen.com',
+  site: 'https://heyedwardchen.com',
 
   integrations: [
     tailwind(),
