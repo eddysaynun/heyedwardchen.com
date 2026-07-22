@@ -37,5 +37,16 @@ export async function GET(context) {
     description: '构建事物的笔记',
     site: context.site!,
     items,
+    // RSS 图标和元数据
+    customData: `
+<image>
+  <url>https://heyedwardchen.com/favicon.svg</url>
+  <title>Edward Chen</title>
+  <link>https://heyedwardchen.com/</link>
+  <width>32</width>
+  <height>32</height>
+</image>
+<atom:link href="https://heyedwardchen.com/rss.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom"/>
+    `,
   });
 }
