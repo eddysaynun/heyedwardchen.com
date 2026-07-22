@@ -1,8 +1,16 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
-import { sortPostsByPinnedAndDate } from '../../utils/posts';
 import { remark } from 'remark';
 import remarkHtml from 'remark-html';
+
+// RSS 专用：纯按日期倒序排序（最新文章在前）
+function sortPostsByDateDescending(posts: any[]): any[] {
+  return [...posts].sort((a, b) => {
+    const dateA = a.data.pubDate || new Date(0);
+    const dateB = b.data.pubDate || new Date(0);
+    return dateB.getTime() - dateA.getTime(); // 最新的在前
+  });
+}
 
 // 辅助函数：将 Markdown 转换为 HTML，并修复相对链接
 async function markdownToHtml(markdown: string, siteUrl: string): Promise<string> {
@@ -38,7 +46,8 @@ async function markdownToHtml(markdown: string, siteUrl: string): Promise<string
 
 export async function GET() {
   const posts = await getCollection('blog');
-  const sortedPosts = sortPostsByPinnedAndDate(posts);
+  // RSS 使用纯日期排序，确保最新文章在第一
+  const sortedPosts = sortPostsByDateDescending(posts);
   const siteUrl = 'https://heyedwardchen.com';
 
   // 渲染所有文章的 HTML 内容
