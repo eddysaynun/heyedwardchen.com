@@ -68,7 +68,7 @@ export async function GET(context) {
     description: '构建事物的笔记',
     site: context.site!,
     items,
-    // RSS 图标和 Atom 自引用
+    // RSS 图标、Atom 自引用和 Folo 认证
     customData: `<image>
   <url>https://heyedwardchen.com/favicon.svg</url>
   <title>Edward Chen</title>
@@ -76,6 +76,10 @@ export async function GET(context) {
   <width>32</width>
   <height>32</height>
 </image>
-<atom:link href="https://heyedwardchen.com/rss.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom"/>`,
+<atom:link href="https://heyedwardchen.com/rss.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<follow_challenge>
+  <feedId>1118027493089869824</feedId>
+  <userId>67422381549442048</userId>
+</follow_challenge>`,
   });
 }
