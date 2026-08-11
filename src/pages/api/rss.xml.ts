@@ -18,6 +18,42 @@ async function markdownToHtml(markdown: string, siteUrl: string): Promise<string
   const result = await remark().use(remarkGfm).use(remarkHtml).process(markdown);
   let html = result.toString();
   
+  // 添加表格样式
+  const tableStyles = `
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.75em;
+  text-align: left;
+}
+th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  border-bottom: 2px solid #bbb;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+td {
+  padding-top: 0.6em;
+  padding-bottom: 0.6em;
+}
+tr:nth-child(even) td {
+  background-color: #fafafa;
+}
+tr:hover td {
+  background-color: #f0f0f0;
+}
+</style>`;
+  
+  // 在 HTML 开头添加样式
+  html = tableStyles + html;
+  
   // 修复所有相对链接为绝对链接
   html = html.replace(
     /href="(blog\/[^"]+\.md)"/g,
