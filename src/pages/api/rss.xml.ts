@@ -2,6 +2,7 @@ import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import { remark } from 'remark';
 import remarkHtml from 'remark-html';
+import remarkGfm from 'remark-gfm';
 
 // RSS 专用：纯按日期倒序排序（最新文章在前）
 function sortPostsByDateDescending(posts: any[]): any[] {
@@ -14,7 +15,7 @@ function sortPostsByDateDescending(posts: any[]): any[] {
 
 // 辅助函数：将 Markdown 转换为 HTML，并修复相对链接
 async function markdownToHtml(markdown: string, siteUrl: string): Promise<string> {
-  const result = await remark().use(remarkHtml).process(markdown);
+  const result = await remark().use(remarkGfm).use(remarkHtml).process(markdown);
   let html = result.toString();
   
   // 修复所有相对链接为绝对链接
