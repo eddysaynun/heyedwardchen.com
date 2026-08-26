@@ -3,83 +3,258 @@ import Layout from '../layouts/Layout.astro';
 import T from '../components/T.astro';
 import { t, DEFAULT_LANG } from '../utils/i18n';
 
-const lang = DEFAULT_LANG;
-
-interface Project {
-  name: string;
-  description: string;
-  status: 'active' | 'wip' | 'archive';
-  tags: string[];
-}
-
-const projects: Project[] = [
+const projects = [
   {
-    name: 'Hermes Agent',
-    description: lang === 'zh-CN' 
-      ? '一个智能 AI 助手，支持多工具协作和自主任务执行'
-      : 'An intelligent AI assistant with multi-tool collaboration and autonomous task execution',
-    status: 'active',
-    tags: ['TypeScript', 'AI']
+    name: 'Continuum',
+    descriptionKey: 'projects.continuum.description',
+    detailKey: 'projects.continuum.detail',
+    signalKey: 'projects.continuum.signal',
+    signal: '20% · 85°C · 15s',
+    tags: ['Swift', 'SwiftUI', 'macOS'],
+    url: 'https://github.com/eddysaynun/Continuum',
   },
   {
-    name: 'RAG Toolkit',
-    description: lang === 'zh-CN'
-      ? '简化 RAG 应用的开发工具包，支持多种向量数据库'
-      : 'A toolkit for simplifying RAG application development with multiple vector database support',
-    status: 'active',
-    tags: ['Python', 'RAG']
+    name: 'Idea Spark',
+    descriptionKey: 'projects.ideaSpark.description',
+    detailKey: 'projects.ideaSpark.detail',
+    signalKey: 'projects.ideaSpark.signal',
+    signal: 'Explorer → Critic → Editor',
+    tags: ['React', 'FastAPI', 'AI'],
+    url: 'https://github.com/eddysaynun/idea-spark',
   },
-  {
-    name: 'Personal Blog',
-    description: lang === 'zh-CN'
-      ? '基于 Astro 构建的静态博客，支持 Markdown 和自动部署'
-      : 'A static blog built with Astro, supporting Markdown and automatic deployment',
-    status: 'wip',
-    tags: ['Astro', 'Tailwind']
-  },
-  {
-    name: 'CLI Tools',
-    description: lang === 'zh-CN'
-      ? '一系列实用的命令行工具，用于日常开发任务'
-      : 'A collection of practical CLI tools for daily development tasks',
-    status: 'archive',
-    tags: ['Rust', 'CLI']
-  }
 ];
 ---
 
-<Layout title={t('projects.title', lang)}>
+<Layout title={t('projects.title', DEFAULT_LANG)} description={t('projects.lede', DEFAULT_LANG)}>
   <section class="hero rise">
-    <div class="meta">
-      <T tkey="projects.meta" />
-    </div>
-
+    <div class="meta"><T tkey="projects.meta" /></div>
     <h1><T tkey="nav.projects" /></h1>
-
     <p class="lede"><T tkey="projects.lede" /></p>
   </section>
 
-  <!-- Projects Grid -->
-  <section class="sec rise d1">
-    <div class="projects">
+  <section class="sec rise d1" aria-label={t('nav.projects', DEFAULT_LANG)}>
+    <div class="repo-list">
       {projects.map((project) => (
-        <article class="project">
-          <h4>
-            <span class={`stat ${project.status}`} title={
-              project.status === 'active' ? t('projects.status.active', lang) : 
-              project.status === 'wip' ? t('projects.status.wip', lang) : 
-              t('projects.status.archive', lang)
-            }></span>
-            {project.name}
-          </h4>
-          <p>{project.description}</p>
-          <div class="foot">
-            {project.tags.map((tag) => (
-              <span class="lang">{tag}</span>
-            ))}
+        <article class="repo-card">
+          <div class="repo-path" aria-hidden="true">
+            <span class="prompt">~</span>
+            <span>github.com/eddysaynun/</span><strong>{project.url.split('/').at(-1)}</strong>
+          </div>
+
+          <div class="repo-body">
+            <div>
+              <div class="repo-heading">
+                <h2>{project.name}</h2>
+                <span class="visibility">public</span>
+              </div>
+              <p class="summary"><T tkey={project.descriptionKey} /></p>
+              <p class="detail"><T tkey={project.detailKey} /></p>
+            </div>
+
+            <dl class="signal">
+              <dt><T tkey={project.signalKey} /></dt>
+              <dd>{project.signal}</dd>
+            </dl>
+          </div>
+
+          <div class="repo-foot">
+            <ul aria-label="Tech stack">
+              {project.tags.map((tag) => <li>{tag}</li>)}
+            </ul>
+            <a href={project.url} target="_blank" rel="noopener noreferrer">
+              <T tkey="projects.viewGithub" />
+              <span aria-hidden="true">↗</span>
+            </a>
           </div>
         </article>
       ))}
     </div>
   </section>
 </Layout>
+
+<style>
+  .repo-list {
+    display: grid;
+    gap: 18px;
+  }
+
+  .repo-card {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: calc(var(--radius) + 2px);
+    background: color-mix(in oklch, var(--bg) 88%, var(--panel));
+    transition: border-color 0.18s, transform 0.18s;
+  }
+
+  .repo-card:hover {
+    border-color: var(--line-strong);
+    transform: translateY(-2px);
+  }
+
+  .repo-path {
+    overflow: hidden;
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--muted-2);
+    font: 10.5px/1.4 var(--mono);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .repo-path .prompt {
+    margin-right: 10px;
+    color: var(--accent);
+  }
+
+  .repo-path strong {
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+
+  .repo-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 32px;
+    padding: 24px 24px 21px;
+  }
+
+  .repo-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .repo-heading h2 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  .visibility {
+    padding: 2px 7px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--muted);
+    font: 9.5px/1.4 var(--mono);
+  }
+
+  .summary {
+    margin: 0 0 8px;
+    color: var(--ink-2);
+    font-size: 14.5px;
+    font-weight: 500;
+  }
+
+  .detail {
+    max-width: 56ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  .signal {
+    min-width: 156px;
+    margin: 3px 0 0;
+    padding-left: 18px;
+    border-left: 1px dashed var(--line-strong);
+    font-family: var(--mono);
+  }
+
+  .signal dt {
+    margin-bottom: 5px;
+    color: var(--muted-2);
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .signal dd {
+    margin: 0;
+    color: var(--accent);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .repo-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 18px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .repo-foot ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .repo-foot li {
+    color: var(--muted);
+    font: 10px/1 var(--mono);
+  }
+
+  .repo-foot li::before {
+    content: '■';
+    margin-right: 5px;
+    color: var(--accent);
+  }
+
+  .repo-foot a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex: none;
+    color: var(--ink-2);
+    font: 11px/1.4 var(--mono);
+    text-decoration: none;
+  }
+
+  .repo-foot a span {
+    color: var(--accent);
+    transition: transform 0.15s;
+  }
+
+  .repo-foot a:hover span {
+    transform: translate(2px, -2px);
+  }
+
+  @media (max-width: 640px) {
+    .repo-body {
+      grid-template-columns: 1fr;
+      gap: 18px;
+      padding: 20px;
+    }
+
+    .signal {
+      padding: 14px 0 0;
+      border-top: 1px dashed var(--line-strong);
+      border-left: 0;
+    }
+
+    .repo-foot {
+      align-items: flex-end;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .repo-card,
+    .repo-foot a span {
+      transition: none;
+    }
+
+    .repo-card:hover {
+      transform: none;
+    }
+  }
+</style>

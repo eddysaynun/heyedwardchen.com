@@ -73,6 +73,13 @@ export const translations: Translations = {
   'projects.status.active': { 'zh-CN': '活跃', en: 'Active' },
   'projects.status.wip': { 'zh-CN': '开发中', en: 'WIP' },
   'projects.status.archive': { 'zh-CN': '归档', en: 'Archive' },
+  'projects.viewGithub': { 'zh-CN': '查看 GitHub', en: 'View on GitHub' },
+  'projects.continuum.description': { 'zh-CN': '让 MacBook 安全地保持盒盖运行。', en: 'Keep a MacBook running safely with the lid closed.' },
+  'projects.continuum.detail': { 'zh-CN': '原生 macOS 菜单栏应用；持续监控电量、温度与传感器状态，并在风险出现时恢复正常休眠。', en: 'A native macOS menu bar app that monitors battery, temperature, and sensor health, restoring normal sleep when risk appears.' },
+  'projects.continuum.signal': { 'zh-CN': '安全默认值', en: 'Safety defaults' },
+  'projects.ideaSpark.description': { 'zh-CN': '把模糊方向，变成可验证的产品机会。', en: 'Turn a vague direction into a testable product opportunity.' },
+  'projects.ideaSpark.detail': { 'zh-CN': '面向独立开发者与小团队的 AI 工作台，通过独立探索、评审与定稿，呈现证据、假设、风险和置信度。', en: 'An AI workbench for indie developers and small teams that separates exploration, critique, and editing while surfacing evidence, assumptions, risks, and confidence.' },
+  'projects.ideaSpark.signal': { 'zh-CN': '模型流水线', en: 'Model pipeline' },
   
   // 关于
   'about.title': { 'zh-CN': '关于 - Edward Chen', en: 'About - Edward Chen' },
