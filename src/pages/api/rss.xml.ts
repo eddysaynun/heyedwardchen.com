@@ -1,5 +1,5 @@
 import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../../utils/published';
 import { remark } from 'remark';
 import remarkHtml from 'remark-html';
 import remarkGfm from 'remark-gfm';
@@ -82,7 +82,7 @@ tr:hover td {
 }
 
 export async function GET() {
-  const posts = await getCollection('blog');
+  const posts = await getPublishedPosts();
   // RSS 使用纯日期排序，确保最新文章在第一
   const sortedPosts = sortPostsByDateDescending(posts);
   const siteUrl = 'https://heyedwardchen.com';

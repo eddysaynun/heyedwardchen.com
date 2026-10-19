@@ -15,6 +15,13 @@ export interface Translations {
 }
 
 export const translations: Translations = {
+  'post.updated': { 'zh-CN': '更新于', en: 'Updated' },
+  'post.series': { 'zh-CN': '系列文章', en: 'Series' },
+  'blog.sort': { 'zh-CN': '排序', en: 'Sort' },
+  'blog.newest': { 'zh-CN': '最近发布', en: 'Newest' },
+  'blog.updated': { 'zh-CN': '最近更新', en: 'Recently updated' },
+  'search.loading': { 'zh-CN': '正在搜索…', en: 'Searching…' },
+  'search.error': { 'zh-CN': '搜索加载失败，请重新输入重试。', en: 'Search failed to load. Type again to retry.' },
   // 导航
   'nav.home': { 'zh-CN': '首页', en: 'Home' },
   'nav.blog': { 'zh-CN': '文章', en: 'Blog' },
@@ -122,7 +129,7 @@ export const translations: Translations = {
   'search.clear': { 'zh-CN': '清除', en: 'Clear' },
   'search.resultsCount': { 'zh-CN': '找到 {count} 篇文章', en: '{count} posts found' },
   'search.noDescription': { 'zh-CN': '暂无描述', en: 'No description' },
-  'search.noResults': { 'zh-CN': '没有找到相关文章', en: 'No matching posts' },
+  'search.noResults': { 'zh-CN': '没有找到相关文章，试试其他关键词或切换到全部标签。', en: 'No matching posts. Try another keyword or select all tags.' },
   
   // 通用
   'common.unpublished': { 'zh-CN': '未发布', en: 'Unpublished' },

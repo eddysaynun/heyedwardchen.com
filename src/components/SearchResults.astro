@@ -1,0 +1,27 @@
+<div id="search-results" class="search-results" hidden>
+  <div class="results-header"><span class="results-count" role="status" aria-live="polite"></span></div>
+  <ul class="results-list"></ul>
+</div>
+
+<style>
+  .search-results[hidden] { display: none; }
+  .results-header { color: var(--muted); font-size: 12px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
+  .results-list { list-style: none; padding: 0; margin: 0; }
+  .search-results :global(.result-link) { display: grid; grid-template-columns: 84px minmax(0, 1fr) 16px; gap: 14px; padding: 24px 0; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+  .search-results :global(.result-link:hover .result-title) { color: var(--accent); }
+  .search-results :global(.result-link:focus-visible) { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+  .search-results :global(.result-date) { font: 11px/1.7 var(--mono); color: var(--muted); padding-top: 2px; }
+  .search-results :global(.result-title) { margin: 0 0 8px; font-size: 17px; font-weight: 600; line-height: 1.55; overflow-wrap: anywhere; transition: color .15s; }
+  .search-results :global(.result-description) { color: var(--muted); font-size: 13px; line-height: 1.8; margin: 0; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .search-results :global(mark) { color: var(--ink); background: color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 2px; padding: 0 1px; }
+  .search-results :global(.result-tags) { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; color: var(--muted); font-size: 11px; }
+  .search-results :global(.result-tags span) { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .search-results :global(.result-arrow) { color: var(--muted); padding-top: 4px; }
+  .search-results :global(.results-empty) { padding: 32px 0; color: var(--muted); font-size: 14px; }
+  @media (max-width: 600px) {
+    .search-results :global(.result-link) { grid-template-columns: minmax(0, 1fr) 16px; gap: 8px; padding: 20px 0; }
+    .search-results :global(.result-date) { grid-column: 1 / -1; }
+    .search-results :global(.result-date:empty) { display: none; }
+    .search-results :global(.result-title) { font-size: 16px; }
+  }
+</style>

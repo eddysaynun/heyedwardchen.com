@@ -18,7 +18,7 @@ export interface BlogPost {
  * @param posts 文章数组
  * @returns 排序后的文章数组（置顶在前，各自按日期倒序）
  */
-export function sortPostsByPinnedAndDate(posts: BlogPost[]): BlogPost[] {
+export function sortPostsByPinnedAndDate<T extends BlogPost>(posts: T[]): T[] {
   // 分离置顶和普通文章
   const pinnedPosts = posts.filter(post => post.data.pinned);
   const normalPosts = posts.filter(post => !post.data.pinned);

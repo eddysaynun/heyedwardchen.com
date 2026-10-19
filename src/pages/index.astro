@@ -1,13 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import T from '../components/T.astro';
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../utils/published';
 import { sortPostsByPinnedAndDate } from '../utils/posts';
 import { t, DEFAULT_LANG } from '../utils/i18n';
 
 const lang = DEFAULT_LANG;
 
-const allPosts = sortPostsByPinnedAndDate(await getCollection('blog'));
+const allPosts = sortPostsByPinnedAndDate(await getPublishedPosts());
 const latestPosts = allPosts.slice(0, 3);
 ---
 

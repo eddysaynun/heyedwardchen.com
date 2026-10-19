@@ -1,4 +1,3 @@
-import { getCollection } from 'astro:content';
 
 export interface PostData {
   id: string;
@@ -21,7 +20,7 @@ export function getRelatedPosts(
   limit: number = 3
 ): PostData[] {
   // 过滤掉当前文章
-  const otherPosts = allPosts.filter(post => post.id !== currentPost.id);
+  const otherPosts = allPosts.filter(post => post.id !== currentPost.id && post.tags.some(tag => currentPost.tags.includes(tag)));
   
   // 计算相关度分数
   const scoredPosts = otherPosts.map(post => {
@@ -63,7 +62,8 @@ export async function getRelatedPostsForCollection(
   currentSlug: string,
   limit: number = 3
 ) {
-  const allPosts = await getCollection('blog');
+  const { getPublishedPosts } = await import('./published');
+  const allPosts = await getPublishedPosts();
   
   const currentPost = allPosts.find(post => post.slug === currentSlug);
   if (!currentPost) return [];

@@ -3,13 +3,13 @@
 ---
 
 <div id="tweaks-panel" class="tweaks-panel">
-  <button class="tweaks-toggle" aria-label="自定义设置" data-i18n-aria-label="settings.customize">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <button class="tweaks-toggle" type="button" aria-expanded="false" aria-controls="tweaks-menu" aria-label="自定义设置" data-i18n-aria-label="settings.customize">
+    <svg width="16" height="16" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="3"></circle>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
     </svg>
   </button>
-  <div class="tweaks-menu">
+  <div id="tweaks-menu" class="tweaks-menu" role="region" aria-label="自定义设置" data-i18n-aria-label="settings.customize" inert>
     <div class="tweak-group">
       <span class="tweak-label" data-i18n="settings.theme">主题</span>
       <div class="tweak-options">
@@ -105,7 +105,9 @@
 
   function setActive(setting: Setting, value: string) {
     document.querySelectorAll(`[data-setting="${setting}"]`).forEach(opt => {
-      opt.classList.toggle('active', (opt as HTMLElement).dataset.value === value);
+      const active = (opt as HTMLElement).dataset.value === value;
+      opt.classList.toggle('active', active);
+      opt.setAttribute('aria-pressed', String(active));
     });
   }
 
@@ -114,15 +116,23 @@
     const menu = document.querySelector<HTMLElement>('.tweaks-menu');
     if (!toggle || !menu) return;
 
-    toggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      menu.classList.toggle('open');
+    function setOpen(open: boolean) {
+      menu!.classList.toggle('open', open);
+      menu!.inert = !open;
+      toggle!.setAttribute('aria-expanded', String(open));
+    }
+    toggle.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
+    document.addEventListener('click', event => {
+      if (!(event.target as Element).closest('#tweaks-panel')) setOpen(false);
     });
-
-    document.addEventListener('click', (e) => {
-      if (!menu.contains(e.target as Node) && e.target !== toggle) {
-        menu.classList.remove('open');
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && menu.classList.contains('open')) {
+        setOpen(false);
+        toggle.focus();
       }
+    });
+    document.addEventListener('focusin', event => {
+      if (!(event.target as Element).closest('#tweaks-panel')) setOpen(false);
     });
 
     document.querySelectorAll<HTMLElement>('.tweak-option').forEach(option => {
@@ -140,8 +150,8 @@
 
     // 恢复保存的偏好
     (['theme', 'typeface', 'density', 'lang'] as Setting[]).forEach(setting => {
-      const saved = localStorage.getItem(STORAGE_KEY(setting));
-      if (!saved) return;
+      const defaults = { theme: 'auto', typeface: 'sans', density: 'normal', lang: DEFAULT_LANG };
+      const saved = localStorage.getItem(STORAGE_KEY(setting)) || defaults[setting];
       setActive(setting, saved);
       if (setting === 'theme') applyTheme(saved);
       else if (setting === 'lang') applyLang(saved);
@@ -150,7 +160,7 @@
 
     // 当用户选了 auto 时，跟随系统主题变化
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (localStorage.getItem(STORAGE_KEY('theme')) === 'auto') applyTheme('auto');
+      if (!localStorage.getItem(STORAGE_KEY('theme')) || localStorage.getItem(STORAGE_KEY('theme')) === 'auto') applyTheme('auto');
     });
   }
 
@@ -164,24 +174,23 @@
 <style>
   .tweaks-panel {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    right: max(16px, env(safe-area-inset-right));
     z-index: 1000;
   }
 
   .tweaks-toggle {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: color-mix(in oklch, var(--bg) 84%, transparent);
     color: var(--ink);
     cursor: pointer;
     display: grid;
     place-items: center;
-    font-size: 18px;
+    font-size: 14px;
     transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+
     border: 1px solid var(--line-strong);
   }
 
@@ -198,29 +207,32 @@
 
   .tweaks-menu {
     position: absolute;
-    bottom: 64px;
+    bottom: 46px;
     right: 0;
     background: var(--bg);
     border: 1px solid var(--line-strong);
     border-radius: 12px;
-    padding: 16px;
-    min-width: 236px;
+    padding: 12px;
+    width: 236px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100dvh - 90px);
+    overflow-y: auto;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(12px) scale(0.95);
+    transform: translateY(4px);
     transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.2s;
-    backdrop-filter: blur(12px);
+
   }
 
   .tweaks-menu.open {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 
   .tweak-group {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .tweak-group:last-child {
@@ -242,9 +254,8 @@
   }
 
   .tweak-option {
-    flex: 0 0 64px;
-    width: 64px;
-    min-width: 64px;
+    flex: 1;
+    min-width: 0;
     padding: 8px 10px;
     border: 1px solid var(--line-strong);
     background: transparent;
@@ -255,7 +266,7 @@
     line-height: 1;
     white-space: nowrap;
     cursor: pointer;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: color 0.15s, background-color 0.15s, border-color 0.15s;
   }
 
   .tweak-option:hover {
@@ -268,5 +279,14 @@
     background: var(--ink);
     color: var(--bg);
     border-color: var(--ink);
+  }
+  .tweaks-toggle { position: relative; background: var(--bg); color: var(--muted); }
+  .tweaks-toggle:focus-visible, .tweak-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  @media (pointer: coarse) {
+    .tweaks-toggle::before { content: ''; position: absolute; inset: -4px; }
+    .tweak-option { min-height: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tweaks-toggle, .tweaks-menu, .tweak-option { transition: none; }
   }
 </style>

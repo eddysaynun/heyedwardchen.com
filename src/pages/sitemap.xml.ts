@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../utils/published';
 
 export const prerender = true;
 
@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ site }) => {
     return new Response('Missing site config', { status: 500 });
   }
 
-  const posts = await getCollection('blog');
+  const posts = await getPublishedPosts();
   const tags = new Set(posts.flatMap(post => post.data.tags));
   const entries = [
     ...staticPages.map(path => urlEntry(site, path)),

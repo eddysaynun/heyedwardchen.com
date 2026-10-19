@@ -1,20 +1,23 @@
+import { remark } from 'remark';
+import remarkGfm from 'remark-gfm';
+import { toSearchText } from '../utils/search';
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../utils/published';
 import { sortPostsByPinnedAndDate } from '../utils/posts';
 
 export const prerender = true;
 
 export const GET: APIRoute = async () => {
-  const posts = sortPostsByPinnedAndDate(await getCollection('blog'));
+  const posts = sortPostsByPinnedAndDate(await getPublishedPosts());
 
   const data = posts.map((post, index) => ({
     id: index,
     title: post.data.title,
     description: post.data.description,
     slug: `/blog/${post.slug}/`,
-    published: (post.data.pubDate ?? new Date()).toISOString(),
+    published: post.data.pubDate?.toISOString() ?? null,
     tags: post.data.tags,
-    content: post.body.slice(0, 2000),
+    content: toSearchText(remark().use(remarkGfm).parse(post.body)),
   }));
 
   return new Response(JSON.stringify(data), {

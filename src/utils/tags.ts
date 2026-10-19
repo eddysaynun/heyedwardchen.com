@@ -1,4 +1,4 @@
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from './published';
 
 export interface TagEntry {
   name: string;
@@ -8,7 +8,7 @@ export interface TagEntry {
 export const TAGS_PER_PAGE = 12;
 
 export async function getAllTagsWithCounts(): Promise<TagEntry[]> {
-  const posts = await getCollection('blog');
+  const posts = await getPublishedPosts();
   const counts: Record<string, number> = {};
 
   for (const post of posts) {

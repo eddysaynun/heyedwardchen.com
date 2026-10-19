@@ -14,220 +14,114 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
       <circle cx="11" cy="11" r="8"></circle>
       <path d="m21 21-4.35-4.35"></path>
     </svg>
-    <input 
-      type="text" 
-      id="search-input" 
+    <input
+      type="text"
+      id="search-input"
       placeholder={placeholder}
       aria-label={t('blog.searchPlaceholder', DEFAULT_LANG)}
       data-i18n-placeholder="blog.searchPlaceholder"
       data-i18n-aria-label="blog.searchPlaceholder"
       autocomplete="off"
     />
-    <span class="kchip">⏎</span>
+
     <button id="clear-search" type="button" class="clear" aria-label={t('search.clear', DEFAULT_LANG)} data-i18n-aria-label="search.clear">×</button>
   </form>
 
-  <div id="search-results" class="search-results" hidden>
-    <div class="results-header">
-      <span class="results-count"></span>
-    </div>
-    <ul class="results-list"></ul>
-  </div>
+
 </div>
 
 <script>
   import { t, type Language } from '../utils/i18n';
-
-  type SearchDocument = import('flexsearch').Document<SearchPost>;
+  import { searchExcerpt } from '../utils/search';
 
   interface SearchPost {
-    id: number;
-    title: string;
-    description?: string;
-    slug: string;
-    published: string;
-    tags: string[];
-    content: string;
+    id: number; title: string; description: string; slug: string;
+    published: string | null; tags: string[]; content: string;
   }
-
-  let index: SearchDocument | null = null;
-  let indexPromise: Promise<void> | null = null;
+  const input = document.querySelector<HTMLInputElement>('#search-input');
+  const clear = document.querySelector<HTMLButtonElement>('#clear-search');
+  const container = document.querySelector<HTMLElement>('#search-results');
+  const list = container?.querySelector<HTMLElement>('.results-list');
+  const count = container?.querySelector<HTMLElement>('.results-count');
   let data: SearchPost[] = [];
-  let latestResults: number[] = [];
-  let latestQuery = '';
-
-  function getLang() {
-    const lang = document.documentElement.dataset.lang || document.documentElement.lang;
-    return (lang === 'en' ? 'en' : 'zh-CN') as Language;
+  let index: import('flexsearch').Document<SearchPost>;
+  let loading: Promise<void> | undefined;
+  let request = 0;
+  const language = () => (document.documentElement.dataset.lang === 'en' ? 'en' : 'zh-CN') as Language;
+  const escape = (text: string) => text.replace(/[&<>"']/g, char => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[char]!));
+  function highlight(text: string, query: string) {
+    const pos = text.toLocaleLowerCase().indexOf(query.toLocaleLowerCase());
+    if (pos < 0) return escape(text);
+    return `${escape(text.slice(0, pos))}<mark>${escape(text.slice(pos, pos + query.length))}</mark>${escape(text.slice(pos + query.length))}`;
   }
-
-  function translate(key: string, params: Record<string, string | number> = {}) {
-    return t(key, getLang(), params);
+  async function load() {
+    if (!loading) loading = (async () => {
+      const [{ Document }, response] = await Promise.all([import('flexsearch'), fetch('/search-index.json')]);
+      if (!response.ok) throw new Error('Search index unavailable');
+      data = await response.json();
+      index = new Document<SearchPost>({document: {id: 'id', index: ['title', 'description', 'content']}, tokenize: 'forward'});
+      data.forEach(post => index.add(post));
+    })().catch(error => { loading = undefined; throw error; });
+    await loading;
   }
-  
-  async function loadIndex() {
-    if (index) return;
-    if (indexPromise) return indexPromise;
-
-    indexPromise = (async () => {
-      const [{ Document }, response] = await Promise.all([
-        import('flexsearch'),
-        fetch('/search-index.json'),
-      ]);
-
-      if (!response.ok) throw new Error('Search index not found');
-      data = await response.json() as SearchPost[];
-
-      index = new Document<SearchPost>({
-        document: {
-          id: 'id',
-          index: ['title', 'description', 'content'],
-          tag: 'tags',
-        },
-        tokenize: 'forward',
-        context: {
-          resolution: 9,
-          depth: 2,
-          separation: false,
-        },
-      });
-
-      data.forEach(doc => index?.add(doc));
-    })().catch((error) => {
-      indexPromise = null;
-      console.error('Failed to load search index:', error);
-    });
-
-    return indexPromise;
-  }
-
-  function escapeHtml(text: string) {
-    return text.replace(/[&<>"']/g, (char) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    }[char]!));
-  }
-
-  function highlightText(text: string, query: string) {
-    const escapedText = escapeHtml(text);
-    if (!query) return escapedText;
-    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(${escapedQuery})`, 'gi');
-    return escapedText.replace(regex, '<mark>$1</mark>');
-  }
-  
-  function renderResults(results: number[], query: string) {
-    const resultsContainer = document.getElementById('search-results');
-    const resultsList = resultsContainer?.querySelector('.results-list');
-    const resultsCount = resultsContainer?.querySelector('.results-count');
-    if (!resultsContainer || !resultsList || !resultsCount) return;
-
-    resultsContainer.hidden = false;
-
-    if (results.length === 0) {
-      resultsCount.textContent = translate('search.resultsCount', { count: 0 });
-      resultsList.innerHTML = `<li class="results-empty">${translate('search.noResults')}</li>`;
-      return;
+  async function search() {
+    const version = ++request;
+    const query = input?.value.trim() ?? '';
+    if (!container || !list || !count || !clear) return;
+    clear.style.display = query ? 'grid' : 'none';
+    container.hidden = !query;
+    const posts = document.getElementById('posts-list');
+    if (posts) posts.hidden = Boolean(query);
+    const timeline = document.querySelector<HTMLElement>('.timeline-side');
+    if (timeline) timeline.hidden = Boolean(query);
+    const sortControl = document.querySelector<HTMLElement>('.sort-control');
+    if (sortControl) sortControl.hidden = Boolean(query);
+    if (!query) return;
+    count.textContent = t('search.loading', language());
+    list.replaceChildren();
+    try {
+      await load();
+      if (version !== request) return;
+      const tag = new URL(location.href).searchParams.get('tag');
+      const ids = new Set(index.search(query, {limit: data.length, suggest: true}).flatMap(result => result.result as number[]));
+      // Literal matching also finds Chinese phrases inside unsegmented text.
+      const needle = query.toLocaleLowerCase();
+      const results = data.filter(post => (!tag || tag === 'all' || post.tags.includes(tag)) &&
+        (ids.has(post.id) || [post.title, post.description, post.content, ...post.tags].some(text => text.toLocaleLowerCase().includes(needle)))).sort((a, b) => Number(b.title.toLocaleLowerCase().includes(needle)) - Number(a.title.toLocaleLowerCase().includes(needle)));
+      count.textContent = t('search.resultsCount', language(), {count: results.length});
+      list.innerHTML = results.length ? results.map(post => `
+        <li class="result-item"><a href="${escape(post.slug)}" class="result-link">
+          ${post.published ? `<time class="result-date" datetime="${escape(post.published)}">${new Date(post.published).toLocaleDateString(language())}</time>` : '<span class="result-date"></span>'}
+          <div class="result-body"><h3 class="result-title">${highlight(post.title, query)}</h3>
+          <p class="result-description">${highlight(searchExcerpt(post.content, query), query)}</p>
+          <div class="result-tags">${post.tags.slice(0, 3).map(tag => `<span>#${escape(tag)}</span>`).join('')}</div></div>
+          <span class="result-arrow" aria-hidden="true">→</span></a></li>`).join('')
+        : `<li class="results-empty">${t('search.noResults', language())}</li>`;
+    } catch {
+      if (version === request) count.textContent = t('search.error', language());
     }
-
-    resultsCount.textContent = translate('search.resultsCount', { count: results.length });
-
-    resultsList.innerHTML = results.map(id => {
-      const post = data[id];
-      if (!post) return '';
-      const date = new Date(post.published).toLocaleDateString(getLang(), { month: '2-digit', day: '2-digit' });
-      const tagMarkup = post.tags
-        .slice(0, 3)
-        .map(tag => `<span>#${escapeHtml(tag)}</span>`)
-        .join('');
-      return `
-        <li class="result-item">
-          <a href="${escapeHtml(post.slug)}" class="result-link">
-            <time class="result-date" datetime="${escapeHtml(post.published)}">${date}</time>
-            <div class="result-body">
-              <h3 class="result-title">${highlightText(post.title, query)}</h3>
-              <p class="result-description">${highlightText(post.description || translate('search.noDescription'), query)}</p>
-              ${tagMarkup ? `<div class="result-tags">${tagMarkup}</div>` : ''}
-            </div>
-            <span class="result-arrow">→</span>
-          </a>
-        </li>
-      `;
-    }).join('');
   }
-
-  async function performSearch(query: string) {
-    if (!query) {
-      latestResults = [];
-      latestQuery = '';
-      const results = document.getElementById('search-results');
-      if (results) results.hidden = true;
-      if (clearBtn) clearBtn.style.display = 'none';
-      return [];
-    }
-
-    if (clearBtn) clearBtn.style.display = 'grid';
-
-    if (!index) {
-      await loadIndex();
-    }
-
-    if (!index) return [];
-
-    const results = Array.from(new Set(index.search(query, {
-      limit: 10,
-      suggest: true,
-      enrichment: true
-    }).flatMap(r => r.result as number[]))).slice(0, 10);
-
-    latestResults = results;
-    latestQuery = query;
-    renderResults(results, query);
-    return results;
+  function updateQuery() {
+    const url = new URL(location.href);
+    const query = input?.value.trim();
+    if (query) url.searchParams.set('q', query); else url.searchParams.delete('q');
+    history.replaceState(null, '', url);
+    void search();
   }
-  
-  // Event listeners
-  const searchForm = document.querySelector<HTMLFormElement>('.search');
-  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
-  const clearBtn = document.getElementById('clear-search') as HTMLButtonElement | null;
-  
-  searchInput?.addEventListener('input', async (e) => {
-    const query = (e.target as HTMLInputElement).value.trim();
-    await performSearch(query);
-  });
+  function restore() {
+    if (input) input.value = new URL(location.href).searchParams.get('q') ?? '';
+    void search();
+  }
+  input?.addEventListener('input', updateQuery);
+  input?.addEventListener('focus', () => { if (input.value) void search(); });
+  document.querySelector('.search')?.addEventListener('submit', event => { event.preventDefault(); updateQuery(); });
+  clear?.addEventListener('click', () => { if (input) input.value = ''; updateQuery(); input?.focus(); });
+  document.addEventListener('blog:filter', () => void search());
+  document.addEventListener('i18n:change', () => void search());
+  window.addEventListener('popstate', restore);
 
-  searchForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!searchInput) return;
-    await performSearch(searchInput.value.trim());
-  });
-  
-  clearBtn?.addEventListener('click', () => {
-    if (!searchInput) return;
-    searchInput.value = '';
-    clearBtn.style.display = 'none';
-    const results = document.getElementById('search-results');
-    if (results) results.hidden = true;
-    searchInput.focus();
-  });
-
-  document.addEventListener('i18n:change', () => {
-    if (latestResults.length > 0 && latestQuery) {
-      renderResults(latestResults, latestQuery);
-    }
-  });
-  
-  // Close results when clicking outside
-  document.addEventListener('click', (e) => {
-    const target = e.target as Element;
-    if (!target.closest('.search-box')) {
-      const results = document.getElementById('search-results');
-      if (results) results.hidden = true;
-    }
-  });
+  input?.addEventListener('keydown', event => { if (event.key === 'Escape' && input) { input.value = ''; updateQuery(); } });
+  restore();
 </script>
 
 <style>
@@ -244,7 +138,7 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
     display: flex;
     align-items: center;
   }
-  
+
   .search svg {
     position: absolute;
     left: 10px;
@@ -253,7 +147,7 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
     color: var(--muted-2);
     pointer-events: none;
   }
-  
+
   .search input {
     width: 100%;
     appearance: none;
@@ -262,48 +156,31 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
     background: transparent;
     color: var(--ink);
     border-radius: 6px;
-    height: 30px;
+    height: 38px;
     padding: 0 30px 0 28px;
     font: 12px/1 var(--mono);
     letter-spacing: -.005em;
     transition: border-color .15s, background .15s;
   }
-  
+
   .search input::placeholder {
     color: var(--muted-2);
   }
-  
+
   .search input:hover {
     border-color: var(--line-strong);
   }
-  
+
   .search input:focus {
     border-color: var(--ink);
     background: var(--bg);
   }
-  
-  .search .kchip {
-    position: absolute;
-    right: 6px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted-2);
-    padding: 2px 5px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    background: var(--panel);
-    pointer-events: none;
-  }
-  
-  .search input:focus ~ .kchip {
-    opacity: 0;
-  }
-  
+
   .search .clear {
     position: absolute;
     right: 6px;
-    width: 18px;
-    height: 18px;
+    width: 28px;
+    height: 28px;
     border-radius: 4px;
     border: 0;
     background: transparent;
@@ -314,199 +191,10 @@ const { placeholder = t('blog.searchPlaceholder', DEFAULT_LANG) } = Astro.props;
     font: 12px/1 var(--mono);
     place-items: center;
   }
-  
+
   .search .clear:hover {
     color: var(--ink);
     background: var(--panel);
   }
-  
-  /* Search Results 下拉 —— 沿用 .post 列表的视觉语言 */
-  .search-results {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: -12px;
-    right: -12px;
-    background: color-mix(in oklch, var(--bg) 92%, transparent);
-    border: 1px solid var(--line-strong);
-    border-radius: 8px;
-    box-shadow: 0 12px 36px -8px rgba(28, 26, 23, 0.10), 0 2px 6px rgba(28, 26, 23, 0.04);
-    max-height: min(520px, 70vh);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    z-index: 100;
-    backdrop-filter: blur(14px) saturate(150%);
-    -webkit-backdrop-filter: blur(14px) saturate(150%);
-  }
 
-  .search-results::-webkit-scrollbar { width: 6px; }
-  .search-results::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
-  .search-results::-webkit-scrollbar-track { background: transparent; }
-
-  .results-header {
-    padding: 10px 14px 9px;
-    border-bottom: 1px solid var(--line);
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted-2);
-    letter-spacing: 0.04em;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .results-header::before {
-    content: '//';
-    color: var(--muted-2);
-  }
-
-  .results-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  /* 一条结果 —— 完全复刻 .post 的网格 / 字号 / 边距 */
-  .result-link {
-    display: grid;
-    grid-template-columns: 84px 1fr auto;
-    gap: 14px;
-    align-items: baseline;
-    padding: var(--row-pad) 14px;
-    text-decoration: none;
-    color: inherit;
-    position: relative;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .result-item:last-child .result-link { border-bottom: 0; }
-
-  /* hover 背景做成"整行铺满 + 微微外溢"，对应 .post::before 的处理 */
-  .result-link::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: transparent;
-    transition: background 0.15s;
-    z-index: -1;
-  }
-
-  .result-link:hover::before,
-  .result-link:focus-visible::before {
-    background: var(--panel);
-  }
-
-  .result-link:focus-visible { outline: none; }
-
-  .result-date {
-    font-family: var(--mono);
-    font-size: 11.5px;
-    color: var(--muted-2);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    padding-top: 2px;
-  }
-
-  .result-body { min-width: 0; }
-
-  /* 标题字号 / 字重 / 间距 / 下划线动画 —— 同 .post .body h3 a */
-  .result-title {
-    font-size: 16px;
-    font-weight: 500;
-    margin: 0 0 4px;
-    color: var(--ink);
-    line-height: 1.35;
-    letter-spacing: -0.01em;
-    background-image: linear-gradient(var(--accent), var(--accent));
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    background-position: 0 100%;
-    transition: background-size 0.25s;
-    display: inline;
-  }
-
-  .result-link:hover .result-title {
-    background-size: 100% 1px;
-  }
-
-  .result-description {
-    font-size: 13.5px;
-    color: var(--muted);
-    margin: 0;
-    line-height: 1.55;
-    text-wrap: pretty;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* tag 行 —— 同 .post .body .row + .pill */
-  .result-tags {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 7px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted-2);
-  }
-
-  .result-tags span {
-    color: var(--muted);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-size: 10px;
-    background: transparent;
-  }
-
-  /* 箭头 —— 同 .post .arrow */
-  .result-arrow {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    opacity: 0;
-    transform: translateX(-4px);
-    transition: opacity 0.2s, transform 0.2s;
-    padding-top: 4px;
-    white-space: nowrap;
-  }
-
-  .result-link:hover .result-arrow {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  mark {
-    background: var(--accent-soft);
-    color: var(--ink);
-    padding: 0 2px;
-    border-radius: 2px;
-    font-weight: 500;
-  }
-
-  /* 空态 */
-  .results-empty {
-    padding: 28px 14px;
-    text-align: center;
-    font-family: var(--mono);
-    font-size: 11.5px;
-    color: var(--muted-2);
-    letter-spacing: 0.02em;
-  }
-
-  @media (max-width: 560px) {
-    .search-results { left: 0; right: 0; }
-
-    .result-link {
-      grid-template-columns: 1fr auto;
-      gap: 6px 14px;
-    }
-
-    .result-date {
-      grid-column: 1 / -1;
-      padding-top: 0;
-    }
-  }
 </style>

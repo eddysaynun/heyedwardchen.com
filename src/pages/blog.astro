@@ -1,16 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import T from '../components/T.astro';
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../utils/published';
 import { sortPostsByPinnedAndDate } from '../utils/posts';
 import Timeline from '../components/Timeline.astro';
+import SearchResults from '../components/SearchResults.astro';
 import Search from '../components/Search.astro';
 import { t, DEFAULT_LANG } from '../utils/i18n';
 
 const lang = DEFAULT_LANG;
 
 // 获取所有博客文章
-const allPosts = await getCollection('blog');
+const allPosts = await getPublishedPosts();
 
 // 使用工具函数排序
 const posts = sortPostsByPinnedAndDate(allPosts);
@@ -51,6 +52,12 @@ const allTags = Object.entries(tagCounts)
     <!-- Controls: Search + Tags -->
     <div class="controls">
       <Search placeholder={t('blog.searchPlaceholder', lang)} />
+      <label class="sort-control"><span class="sr-only"><T tkey="blog.sort" /></span>
+        <select id="post-sort" aria-label={t('blog.sort', lang)} data-i18n-aria-label="blog.sort">
+          <option value="published" data-i18n="blog.newest">最近发布</option>
+          <option value="updated" data-i18n="blog.updated">最近更新</option>
+        </select>
+      </label>
     </div>
     
     <div class="tags-wrapper">
@@ -74,9 +81,10 @@ const allTags = Object.entries(tagCounts)
       )}
     </div>
     
+    <SearchResults />
     <ol class="posts" id="posts-list">
       {posts.map((post) => (
-        <li class={`post ${post.data.pinned ? 'pinned' : ''}`} data-tags={post.data.tags.join(',')}>
+        <li class={`post ${post.data.pinned ? 'pinned' : ''}`} data-tags={JSON.stringify(post.data.tags)} data-pinned={String(post.data.pinned)} data-published={post.data.pubDate?.getTime() ?? 0} data-updated={(post.data.updatedDate ?? post.data.pubDate)?.getTime() ?? 0}>
           <time class="date" datetime={post.data.pubDate?.toISOString() || ''}>
             {post.data.pubDate?.toLocaleDateString(lang) || t('common.unpublished', lang)}
           </time>
@@ -85,6 +93,7 @@ const allTags = Object.entries(tagCounts)
               <a href={`/blog/${post.slug}`}>{post.data.title}</a>
             </h3>
             <p>{post.data.description}</p>
+            {post.data.updatedDate && <small><T tkey="post.updated" /> <time datetime={post.data.updatedDate.toISOString()} data-i18n-date={post.data.updatedDate.toISOString()}>{post.data.updatedDate.toLocaleDateString(lang)}</time></small>}
             <div class="row">
               {post.data.tags.map((tag) => (
                 <a href={`/blog?tag=${encodeURIComponent(tag)}`} 
@@ -106,64 +115,43 @@ const allTags = Object.entries(tagCounts)
   <!-- Timeline Sidebar -->
   <Timeline posts={posts} />
 
-  <script is:inline>
-    (function() {
-      const tagButtons = document.querySelectorAll('.tag');
-      const posts = document.querySelectorAll('#posts-list .post');
-      const urlParams = new URLSearchParams(window.location.search);
-      const selectedTag = urlParams.get('tag');
-
-      // 高亮选中的 tag 按钮
-      if (selectedTag) {
-        tagButtons.forEach(btn => {
-          btn.classList.toggle('on', btn.dataset.tag === selectedTag);
-        });
-        filterPosts(selectedTag);
-      } else {
-        tagButtons[0]?.classList.add('on');
-      }
-
-      // 点击 tag 按钮筛选
-      tagButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tag = btn.dataset.tag;
-          
-          // 更新按钮状态
-          tagButtons.forEach(b => b.classList.remove('on'));
-          btn.classList.add('on');
-
-          // 更新 URL（不刷新页面）
-          const newUrl = tag === 'all' 
-            ? '/blog' 
-            : '/blog?tag=' + encodeURIComponent(tag);
-          history.pushState({ tag: tag }, '', newUrl);
-
-          // 筛选文章
-          filterPosts(tag);
-        });
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.tag[data-tag]');
+    const list = document.querySelector<HTMLOListElement>('#posts-list');
+    const posts = Array.from(document.querySelectorAll<HTMLElement>('#posts-list .post'));
+    const sort = document.querySelector<HTMLSelectElement>('#post-sort');
+    function applyFilters() {
+      const params = new URL(location.href).searchParams;
+      const tag = params.get('tag') || 'all';
+      const order = params.get('sort') === 'updated' ? 'updated' : 'published';
+      if (sort) sort.value = order;
+      buttons.forEach(button => {
+        const active = button.dataset.tag === tag;
+        button.classList.toggle('on', active);
+        button.setAttribute('aria-pressed', String(active));
+        if (active) button.classList.remove('hidden-tag');
       });
-
-      // 筛选函数
-      function filterPosts(tag) {
-        posts.forEach(post => {
-          const postTags = post.dataset.tags.split(',');
-          if (tag === 'all' || postTags.includes(tag)) {
-            post.style.display = '';
-          } else {
-            post.style.display = 'none';
-          }
-        });
-      }
-
-      // 支持浏览器前进后退
-      window.addEventListener('popstate', function(e) {
-        var tag = (e.state && e.state.tag) || 'all';
-        tagButtons.forEach(function(btn) {
-          btn.classList.toggle('on', btn.dataset.tag === tag);
-        });
-        filterPosts(tag);
+      posts.sort((a, b) => Number(b.dataset.pinned === 'true') - Number(a.dataset.pinned === 'true') || Number(b.dataset[order]) - Number(a.dataset[order]));
+      posts.forEach(post => {
+        post.hidden = tag !== 'all' && !JSON.parse(post.dataset.tags!).includes(tag);
+        list?.append(post);
       });
-    })();
+      document.dispatchEvent(new Event('blog:filter'));
+    }
+    buttons.forEach(button => button.addEventListener('click', () => {
+      const url = new URL(location.href);
+      if (button.dataset.tag === 'all') url.searchParams.delete('tag'); else url.searchParams.set('tag', button.dataset.tag!);
+      history.pushState(null, '', url);
+      applyFilters();
+    }));
+    sort?.addEventListener('change', () => {
+      const url = new URL(location.href);
+      if (sort.value === 'updated') url.searchParams.set('sort', 'updated'); else url.searchParams.delete('sort');
+      history.pushState(null, '', url);
+      applyFilters();
+    });
+    window.addEventListener('popstate', applyFilters);
+    applyFilters();
   </script>
 
   <style>
@@ -178,6 +166,10 @@ const allTags = Object.entries(tagCounts)
       }
     }
     
+    .post[hidden], #posts-list[hidden] { display: none; }
+    :global(.timeline-side[hidden]) { display: none; }
+    .sort-control select { max-width: 130px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px; height: 38px; font-size: 12px; }
+    small { color: var(--muted); }
     /* Controls row */
     .controls {
       display: flex;
@@ -230,7 +222,7 @@ const allTags = Object.entries(tagCounts)
           if (hideText) hideText.style.display = '';
         } else {
           tagsContainer.querySelectorAll('.tag').forEach((t, i) => {
-            if (i >= 10) t.classList.add('hidden-tag');
+            if (i > 10 && !t.classList.contains('on')) t.classList.add('hidden-tag');
           });
           if (showText) showText.style.display = '';
           if (hideText) hideText.style.display = 'none';
