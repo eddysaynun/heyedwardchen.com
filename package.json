@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm run sync-blog && npx astro dev",
     "start": "npm run dev",
-    "build": "npm run sync-blog && npx astro build",
+    "build": "npm run sync-blog && node scripts/test-markdown-emphasis.mjs && npx astro build",
     "preview": "npm run build && wrangler dev",
     "astro": "npx astro",
     "deploy": "npm run build && wrangler deploy",
