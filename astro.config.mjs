@@ -1,6 +1,7 @@
 /// <reference types="astro" />
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import remarkCitations from './src/plugins/remark-citations.mjs';
 
 import cloudflare from "@astrojs/cloudflare";
 
@@ -34,6 +35,7 @@ export default defineConfig({
   ],
 
   markdown: {
+    remarkPlugins: [remarkCitations],
     rehypePlugins: [addImageAttributes],
     shikiConfig: {
       themes: {

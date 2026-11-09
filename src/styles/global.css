@@ -14,8 +14,8 @@
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --serif: 'Newsreader', ui-serif, Georgia, serif;
-  --col: 800px;
-  --col-wide: 900px;
+  --col: 1120px;
+  --col-wide: 1120px;
   --row-pad: 18px;
   --radius: 6px;
 }
@@ -432,7 +432,7 @@ ol.posts {
 
 .post {
   display: grid;
-  grid-template-columns: 84px 1fr auto;
+  grid-template-columns: 84px minmax(0, 1fr) auto;
   gap: 14px;
   align-items: baseline;
   padding: var(--row-pad) 0;
@@ -499,6 +499,7 @@ ol.posts {
 
 .post .body .row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   margin-top: 7px;
@@ -859,6 +860,13 @@ footer.site .links a {
 
 [data-density='comfy'] {
   --row-pad: 26px;
+}
+
+/* Small headers get a real navigation row rather than stacked characters. */
+@media (max-width: 480px) {
+  .site-inner { flex-wrap: wrap; padding: 12px 0; gap: 8px; }
+  nav.top { width: 100%; justify-content: space-between; }
+  nav.top a { white-space: nowrap; }
 }
 
 /* Mobile responsive */

@@ -180,10 +180,11 @@
   }
 
   .tweaks-toggle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: color-mix(in oklch, var(--bg) 84%, transparent);
+    width: 44px;
+    height: 44px;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     color: var(--ink);
     cursor: pointer;
     display: grid;
@@ -191,14 +192,14 @@
     font-size: 14px;
     transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 
-    border: 1px solid var(--line-strong);
+    border: 0;
   }
 
   .tweaks-toggle:hover {
     transform: translateY(-1px);
-    border-color: var(--ink-2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    background: color-mix(in oklch, var(--bg) 92%, transparent);
+    color: var(--accent);
+    box-shadow: none;
+    background: transparent;
   }
 
   .tweaks-toggle:active {
@@ -280,10 +281,9 @@
     color: var(--bg);
     border-color: var(--ink);
   }
-  .tweaks-toggle { position: relative; background: var(--bg); color: var(--muted); }
+  .tweaks-toggle { position: relative; color: var(--muted); }
   .tweaks-toggle:focus-visible, .tweak-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   @media (pointer: coarse) {
-    .tweaks-toggle::before { content: ''; position: absolute; inset: -4px; }
     .tweak-option { min-height: 44px; }
   }
   @media (prefers-reduced-motion: reduce) {

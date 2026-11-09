@@ -1,3 +1,19 @@
+/* Citations are small editorial markers, not boxed UI badges. */
+.markdown-body .citation { font: 600 0.72em/1 var(--mono); vertical-align: super; white-space: nowrap; margin-inline: 0.12em; }
+.markdown-body .citation a { border: 0; text-decoration: none; padding: 0.15em 0.2em; scroll-margin-top: 110px; }
+.markdown-body .citation a:hover { text-decoration: underline; }
+.markdown-body .reference-item { scroll-margin-top: 110px; overflow-wrap: anywhere; }
+.markdown-body .reference-item:target { background: var(--accent-soft); }
+.markdown-body .citation a:target { outline: 2px solid var(--accent); outline-offset: 3px; }
+.markdown-body .reference-backlinks { display: inline-flex; flex-wrap: wrap; gap: 0.35em; margin-inline-start: 0.6em; }
+.markdown-body .reference-backlink { font: 12px/1.6 var(--mono); border: 0; padding: 0.2em; }
+.markdown-body { min-width: 0; overflow-wrap: anywhere; }
+.markdown-body pre { max-width: 100%; overflow-wrap: normal; }
+.markdown-body img { max-width: 100%; height: auto; }
+.markdown-body .lightbox-enabled { cursor: zoom-in; }
+.markdown-body .image-zoom-trigger { display: block; min-height: 44px; padding: 8px 0; margin: -12px 0 20px; color: var(--muted); background: transparent; border: 0; font: 12px/1.4 var(--mono); cursor: zoom-in; }
+.markdown-body .image-zoom-trigger:hover { color: var(--accent); }
+
 /* Markdown Content Styles - Enhanced */
 
 .markdown-body {
@@ -332,16 +348,14 @@
   vertical-align: top;
 }
 
-/* 宽表格以正文中心线为基准轻微外扩，文字换行后不再接近整屏铺开。 */
+/* Keep wide tables inside the reading column, away from fixed rails. */
 .markdown-body > table {
-  width: max-content;
-  max-width: min(calc(100% + 8rem), calc(100vw - 2rem));
+  display: block;
+  width: 100%;
+  max-width: 100%;
   text-align: left;
   margin: 1.25rem 0;
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  overflow: visible;
+  overflow-x: auto;
 }
 
 .markdown-body tr:nth-child(even) {

@@ -1,0 +1,114 @@
+<dialog class="article-lightbox" aria-label="图片预览" aria-describedby="lightbox-caption">
+  <button type="button" class="lightbox-close" aria-label="关闭图片预览" autofocus>×</button>
+  <button type="button" class="lightbox-zoom" aria-label="放大至原始尺寸" aria-pressed="false">＋</button>
+  <figure>
+    <img class="lightbox-image" alt="" />
+    <figcaption id="lightbox-caption"></figcaption>
+  </figure>
+</dialog>
+<script>
+  let cleanup: (() => void) | undefined;
+  function initLightbox() {
+    cleanup?.();
+    const dialog = document.querySelector<HTMLDialogElement>('.article-lightbox');
+    const article = document.querySelector<HTMLElement>('.article-content .markdown-body');
+    if (!dialog || !article) return;
+    const controller = new AbortController();
+    const { signal } = controller;
+    const preview = dialog.querySelector<HTMLImageElement>('.lightbox-image')!;
+    const caption = dialog.querySelector<HTMLElement>('figcaption')!;
+    const close = dialog.querySelector<HTMLButtonElement>('.lightbox-close')!;
+    const zoom = dialog.querySelector<HTMLButtonElement>('.lightbox-zoom')!;
+    const toggleZoom = () => {
+      const enlarged = dialog.classList.toggle('is-zoomed');
+      zoom.setAttribute('aria-pressed', String(enlarged));
+      zoom.setAttribute('aria-label', enlarged ? '适应屏幕' : '放大至原始尺寸');
+      zoom.textContent = enlarged ? '−' : '＋';
+      dialog.scrollTo(0, 0);
+    };
+    let returnFocus: HTMLElement | null = null;
+    let scrollState: { body: string; root: string } | null = null;
+    const restore = () => {
+      if (!scrollState) return;
+      document.body.style.overflow = scrollState.body;
+      document.documentElement.style.overflow = scrollState.root;
+      scrollState = null;
+      returnFocus?.focus({ preventScroll: true });
+      preview.removeAttribute('src');
+      if (dialog.classList.contains('is-zoomed')) toggleZoom();
+    };
+    const open = (image: HTMLImageElement, trigger: HTMLElement) => {
+      if (dialog.open) return;
+      returnFocus = trigger;
+      preview.src = image.currentSrc || image.src;
+      preview.alt = image.alt;
+      caption.textContent = image.alt || '文章图片';
+      scrollState = { body: document.body.style.overflow, root: document.documentElement.style.overflow };
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      dialog.showModal();
+      close.focus({ preventScroll: true });
+    };
+    const buttons: HTMLButtonElement[] = [];
+    const images: HTMLImageElement[] = [];
+    article.querySelectorAll<HTMLImageElement>('img').forEach(image => {
+      // Never hijack linked images, icons, badges, avatars or explicitly opted-out art.
+      if (image.closest('a, button, [data-no-lightbox]') || image.matches('.avatar, .icon, [role="presentation"]') || (image.hasAttribute('width') && Number(image.getAttribute('width')) < 96)) return;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'image-zoom-trigger';
+      button.textContent = '↗ 放大图片';
+      button.setAttribute('aria-label', `放大图片：${image.alt || '文章图片'}`);
+      button.setAttribute('aria-haspopup', 'dialog');
+      image.insertAdjacentElement('afterend', button);
+      image.classList.add('lightbox-enabled');
+      image.addEventListener('dblclick', () => open(image, button), { signal });
+      button.addEventListener('click', () => open(image, button), { signal });
+      buttons.push(button); images.push(image);
+    });
+    close.addEventListener('click', () => dialog.close(), { signal });
+    zoom.addEventListener('click', toggleZoom, { signal });
+    preview.addEventListener('dblclick', toggleZoom, { signal });
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); }, { signal });
+    dialog.addEventListener('close', restore, { signal });
+    dialog.addEventListener('keydown', event => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        (document.activeElement === close ? zoom : close).focus();
+      }
+    }, { signal });
+    // Native showModal supplies inert background and Escape/cancel semantics.
+    cleanup = () => {
+      if (dialog.open) dialog.close();
+      restore(); controller.abort();
+      buttons.forEach(button => button.remove());
+      images.forEach(image => image.classList.remove('lightbox-enabled'));
+      cleanup = undefined;
+    };
+  }
+  initLightbox();
+  document.addEventListener('astro:page-load', initLightbox);
+  document.addEventListener('astro:before-swap', () => cleanup?.());
+</script>
+<style>
+  .article-lightbox {
+    position: fixed; inset: 0; width: 100vw; height: 100dvh;
+    max-width: none; max-height: none; margin: 0; border: 0;
+    padding: 64px 24px 24px; background: transparent; color: #fff;
+  }
+  .article-lightbox[open] { display: grid; place-items: center; }
+  .article-lightbox::backdrop { background: rgb(10 10 12 / 92%); }
+  .article-lightbox figure { margin: 0; max-width: 100%; pointer-events: none; }
+  .lightbox-image { display: block; max-width: 100%; max-height: calc(100dvh - 150px); margin: auto; object-fit: contain; pointer-events: auto; }
+  .article-lightbox figcaption { text-align: center; margin-top: 16px; max-width: 90vw; max-height: 48px; overflow: auto; font-size: 14px; pointer-events: auto; }
+  .lightbox-close, .lightbox-zoom { position: fixed; right: max(16px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); width: 44px; height: 44px; border: 0; background: transparent; color: #fff; cursor: pointer; font-size: 32px; line-height: 1; }
+  .lightbox-close:hover, .lightbox-zoom:hover { color: var(--accent); }
+  .lightbox-zoom { right: calc(max(16px, env(safe-area-inset-right)) + 52px); }
+  .article-lightbox.is-zoomed { display: block; overflow: auto; }
+  .article-lightbox.is-zoomed figure { width: max-content; max-width: none; margin: auto; }
+  .article-lightbox.is-zoomed .lightbox-image { max-width: none; max-height: none; }
+  .article-lightbox.is-zoomed figcaption { position: sticky; left: 0; }
+  .lightbox-image { cursor: zoom-in; }
+  .is-zoomed .lightbox-image { cursor: zoom-out; }
+  @media (max-width: 640px) { .article-lightbox { padding: 64px 12px 20px; } }
+</style>
