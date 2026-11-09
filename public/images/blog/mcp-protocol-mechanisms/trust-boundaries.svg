@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1480" viewBox="0 0 1000 1480"><rect width="1000" height="1480" fill="#f7f9fc"/>
+<text x="40" y="73" font-size="38" font-family="Heiti SC, sans-serif" fill="#162b42">凭据与信任边界：谁能拿到什么</text>
+<text x="40" y="120" font-size="26" font-family="Heiti SC, sans-serif" fill="#465d73">TLS 保护远程链路；业务同意与资源权限仍须分别判断</text>
+<rect x="40" y="155" width="920" height="154" rx="14" fill="#fff0d9" stroke="#cad7e5" stroke-width="2"/>
+<text x="65" y="206" font-size="31" font-family="Heiti SC, sans-serif" fill="#162b42">用户 → 授权服务器 AS</text>
+<text x="65" y="249" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">登录密码 / 通行密钥在 AS 的登录链路使用</text>
+<text x="65" y="288" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">用户授权范围；不把登录凭据给模型或 MCP</text>
+<line x1="500" y1="315" x2="500" y2="358" stroke="#126a59" stroke-width="3"/>
+<polygon points="500,358 494.93756154998755,346.0262070779625 505.06243845001245,346.0262070779625" fill="#126a59"/>
+<rect x="40" y="370" width="920" height="154" rx="14" fill="#ffffff" stroke="#cad7e5" stroke-width="2"/>
+<text x="65" y="421" font-size="31" font-family="Heiti SC, sans-serif" fill="#162b42">宿主与客户端：保管一次授权的状态</text>
+<text x="65" y="464" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">保存 verifier、state、预期 issuer，以及获发的 token</text>
+<text x="65" y="503" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">public client 的 client_id 公开；不是 secret</text>
+<line x1="500" y1="530" x2="500" y2="573" stroke="#2468a1" stroke-width="3"/>
+<polygon points="500,573 494.93756154998755,561.0262070779625 505.06243845001245,561.0262070779625" fill="#2468a1"/>
+<rect x="40" y="585" width="920" height="154" rx="14" fill="#ffffff" stroke="#cad7e5" stroke-width="2"/>
+<text x="65" y="636" font-size="31" font-family="Heiti SC, sans-serif" fill="#162b42">客户端 → AS token endpoint</text>
+<text x="65" y="679" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">授权码 + verifier；AS 校验后签发 MCP access token</text>
+<text x="65" y="718" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">confidential client 另按约定用 secret / 私钥认证</text>
+<line x1="500" y1="745" x2="500" y2="788" stroke="#126a59" stroke-width="3"/>
+<polygon points="500,788 494.93756154998755,776.0262070779625 505.06243845001245,776.0262070779625" fill="#126a59"/>
+<rect x="40" y="800" width="920" height="154" rx="14" fill="#e6f3ee" stroke="#cad7e5" stroke-width="2"/>
+<text x="65" y="851" font-size="31" font-family="Heiti SC, sans-serif" fill="#162b42">客户端 → MCP 资源服务器 RS</text>
+<text x="65" y="894" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">仅发送以本 MCP 为目标受众的访问令牌</text>
+<text x="65" y="933" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">RS 验签或查询可信令牌状态，再检查具体资源权限</text>
+<line x1="500" y1="961" x2="500" y2="1004" stroke="#a52b35" stroke-width="3"/>
+<polygon points="500,1004 494.93756154998755,992.0262070779625 505.06243845001245,992.0262070779625" fill="#a52b35"/>
+<rect x="40" y="1015" width="920" height="74" rx="14" fill="#ffe9e9" stroke="#d6959b" stroke-width="2"/>
+<text x="211.0" y="1065" font-size="28" font-family="Heiti SC, sans-serif" fill="#98202c">禁止把收到的 MCP token 直接透传给上游 API</text>
+<rect x="40" y="1120" width="920" height="154" rx="14" fill="#ffffff" stroke="#cad7e5" stroke-width="2"/>
+<text x="65" y="1171" font-size="31" font-family="Heiti SC, sans-serif" fill="#162b42">MCP → 第三方 API：另一套凭据与授权</text>
+<text x="65" y="1214" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">上游 token 由上游授权服务器单独签发</text>
+<text x="65" y="1253" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">获得报告读取权 ≠ 用户同意本次向外发送报告</text>
+<text x="40" y="1359" font-size="29" font-family="Heiti SC, sans-serif" fill="#162b42">没有跨所有角色通用的一张“登录凭证”。</text>
+<text x="40" y="1407" font-size="27" font-family="Heiti SC, sans-serif" fill="#465d73">stdio 则以本地启动身份、进程权限与受控凭据为边界。</text>
+<text x="40" y="1454" font-size="23" font-family="Heiti SC, sans-serif" fill="#465d73">依据：[9][25][27][35][36]；箭头展示使用顺序，不表示秘密透传。</text></svg>

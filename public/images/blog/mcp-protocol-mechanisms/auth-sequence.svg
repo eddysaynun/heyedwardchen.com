@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1830" viewBox="0 0 1000 1830"><rect width="1000" height="1830" fill="#f7f9fc"/>
+<text x="40" y="73" font-size="38" font-family="Heiti SC, sans-serif" fill="#162b42">HTTP 认证：先获授权，再调用 MCP</text>
+<text x="40" y="119" font-size="25" font-family="Heiti SC, sans-serif" fill="#465d73">2026-07-28 · 预注册 public client · 虚构教学流程</text>
+<rect x="25" y="145" width="250" height="66" rx="14" fill="#ffffff" stroke="#cad7e5" stroke-width="2"/>
+<text x="109.5" y="190" font-size="27" font-family="Heiti SC, sans-serif" fill="#162b42">客户端</text>
+<line x1="150" y1="220" x2="150" y2="1710" stroke="#c5d4e4" stroke-width="3"/>
+<rect x="385" y="145" width="250" height="66" rx="14" fill="#ffffff" stroke="#cad7e5" stroke-width="2"/>
+<text x="422.5" y="190" font-size="27" font-family="Heiti SC, sans-serif" fill="#162b42">授权服务器 AS</text>
+<line x1="510" y1="220" x2="510" y2="1710" stroke="#c5d4e4" stroke-width="3"/>
+<rect x="725" y="145" width="250" height="66" rx="14" fill="#ffffff" stroke="#cad7e5" stroke-width="2"/>
+<text x="791.0" y="190" font-size="27" font-family="Heiti SC, sans-serif" fill="#162b42">MCP / RS</text>
+<line x1="850" y1="220" x2="850" y2="1710" stroke="#c5d4e4" stroke-width="3"/>
+<rect x="35" y="235" width="930" height="55" rx="14" fill="#e8eff8" stroke="#cad7e5" stroke-width="2"/>
+<text x="55" y="276" font-size="28" font-family="Heiti SC, sans-serif" fill="#2468a1">① 发现：各 HTTPS 连接先验证远端证书</text>
+<text x="162" y="329" font-size="26" font-family="Heiti SC, sans-serif" fill="#2468a1">未带 token 的 MCP POST</text>
+<line x1="150" y1="342" x2="850" y2="342" stroke="#2468a1" stroke-width="3"/>
+<polygon points="850,342 838.0262070779625,347.06243845001245 838.0262070779625,336.93756154998755" fill="#2468a1"/>
+<text x="162" y="410" font-size="26" font-family="Heiti SC, sans-serif" fill="#126a59">401 · resource_metadata 地址</text>
+<line x1="850" y1="423" x2="150" y2="423" stroke="#126a59" stroke-width="3"/>
+<polygon points="150,423 161.97379292203752,417.93756154998755 161.97379292203752,428.06243845001245" fill="#126a59"/>
+<text x="162" y="491" font-size="26" font-family="Heiti SC, sans-serif" fill="#2468a1">GET 资源元数据 → 得到 AS issuer</text>
+<line x1="150" y1="504" x2="850" y2="504" stroke="#2468a1" stroke-width="3"/>
+<polygon points="850,504 838.0262070779625,509.06243845001245 838.0262070779625,498.93756154998755" fill="#2468a1"/>
+<text x="162" y="572" font-size="26" font-family="Heiti SC, sans-serif" fill="#2468a1">GET AS metadata</text>
+<line x1="150" y1="585" x2="510" y2="585" stroke="#2468a1" stroke-width="3"/>
+<polygon points="510,585 498.0262070779625,590.0624384500125 498.0262070779625,579.9375615499875" fill="#2468a1"/>
+<text x="175" y="633" font-size="25" font-family="Heiti SC, sans-serif" fill="#465d73">核对 issuer / PKCE；使用已登记 client_id</text>
+<rect x="35" y="665" width="930" height="55" rx="14" fill="#e8eff8" stroke="#cad7e5" stroke-width="2"/>
+<text x="55" y="706" font-size="28" font-family="Heiti SC, sans-serif" fill="#2468a1">② 授权：用户登录 ≠ 客户端认证 ≠ PKCE</text>
+<text x="162" y="764" font-size="26" font-family="Heiti SC, sans-serif" fill="#2468a1">浏览器发起授权请求</text>
+<line x1="150" y1="777" x2="510" y2="777" stroke="#2468a1" stroke-width="3"/>
+<polygon points="510,777 498.0262070779625,782.0624384500125 498.0262070779625,771.9375615499875" fill="#2468a1"/>
+<text x="175" y="823" font-size="25" font-family="Heiti SC, sans-serif" fill="#465d73">challenge + resource + state</text>
+<rect x="390" y="850" width="550" height="102" rx="14" fill="#fff0d9" stroke="#cad7e5" stroke-width="2"/>
+<text x="415" y="898" font-size="28" font-family="Heiti SC, sans-serif" fill="#162b42">用户在 AS 登录，允许读取报告</text>
+<text x="415" y="934" font-size="25" font-family="Heiti SC, sans-serif" fill="#465d73">密码 / 通行密钥不交给 MCP</text>
+<text x="162" y="1007" font-size="26" font-family="Heiti SC, sans-serif" fill="#126a59">回调：code + state + iss</text>
+<line x1="510" y1="1020" x2="150" y2="1020" stroke="#126a59" stroke-width="3"/>
+<polygon points="150,1020 161.97379292203752,1014.9375615499875 161.97379292203752,1025.0624384500125" fill="#126a59"/>
+<text x="175" y="1067" font-size="25" font-family="Heiti SC, sans-serif" fill="#465d73">客户端先校验 state 与 issuer</text>
+<text x="162" y="1131" font-size="26" font-family="Heiti SC, sans-serif" fill="#2468a1">向 token 端点兑换</text>
+<line x1="150" y1="1144" x2="510" y2="1144" stroke="#2468a1" stroke-width="3"/>
+<polygon points="510,1144 498.0262070779625,1149.0624384500125 498.0262070779625,1138.9375615499875" fill="#2468a1"/>
+<text x="175" y="1192" font-size="25" font-family="Heiti SC, sans-serif" fill="#465d73">code + verifier + resource</text>
+<text x="162" y="1242" font-size="26" font-family="Heiti SC, sans-serif" fill="#126a59">返回 access token</text>
+<line x1="510" y1="1255" x2="150" y2="1255" stroke="#126a59" stroke-width="3"/>
+<polygon points="150,1255 161.97379292203752,1249.9375615499875 161.97379292203752,1260.0624384500125" fill="#126a59"/>
+<rect x="35" y="1310" width="930" height="55" rx="14" fill="#e8eff8" stroke="#cad7e5" stroke-width="2"/>
+<text x="55" y="1351" font-size="28" font-family="Heiti SC, sans-serif" fill="#2468a1">③ 调用：Bearer token 仅用于目标资源</text>
+<text x="162" y="1407" font-size="26" font-family="Heiti SC, sans-serif" fill="#2468a1">POST /mcp · Authorization: Bearer token</text>
+<line x1="150" y1="1420" x2="850" y2="1420" stroke="#2468a1" stroke-width="3"/>
+<polygon points="850,1420 838.0262070779625,1425.0624384500125 838.0262070779625,1414.9375615499875" fill="#2468a1"/>
+<rect x="405" y="1460" width="535" height="110" rx="14" fill="#e6f3ee" stroke="#cad7e5" stroke-width="2"/>
+<text x="430" y="1505" font-size="27" font-family="Heiti SC, sans-serif" fill="#162b42">RS 检查签发者、受众、有效期</text>
+<text x="430" y="1548" font-size="27" font-family="Heiti SC, sans-serif" fill="#162b42">scope 与报告资源权限</text>
+<text x="162" y="1627" font-size="26" font-family="Heiti SC, sans-serif" fill="#126a59">通过 → 结果；拒绝 → 401 / 403</text>
+<line x1="850" y1="1640" x2="150" y2="1640" stroke="#126a59" stroke-width="3"/>
+<polygon points="150,1640 161.97379292203752,1634.9375615499875 161.97379292203752,1645.0624384500125" fill="#126a59"/>
+<text x="40" y="1766" font-size="26" font-family="Heiti SC, sans-serif" fill="#162b42">PKCE 绑定授权码兑换；不是用户登录或软件真实性认证。</text>
+<text x="40" y="1810" font-size="23" font-family="Heiti SC, sans-serif" fill="#465d73">依据：[25][26][27][35]；箭头表示协议方向，不代表真实流量。</text></svg>
